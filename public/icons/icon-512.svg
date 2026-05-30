@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#1E3A8A"/>
+  <g transform="translate(100, 50)">
+    <rect x="10" y="10" width="300" height="220" rx="10" fill="none" stroke="white" stroke-width="6"/>
+    <rect x="30" y="30" width="260" height="170" fill="white" opacity="0.2"/>
+    <rect x="130" y="230" width="60" height="30" fill="white"/>
+    <rect x="90" y="260" width="140" height="14" rx="7" fill="white"/>
+  </g>
+  <text x="256" y="380" text-anchor="middle" font-family="serif" font-size="60" font-style="italic" fill="white" font-weight="bold">JC</text>
+</svg>

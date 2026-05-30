@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="white"/>
+  <!-- Monitor -->
+  <g transform="translate(90, 30)">
+    <rect x="10" y="10" width="100" height="80" rx="5" fill="none" stroke="#1E3A8A" stroke-width="4"/>
+    <rect x="18" y="18" width="84" height="58" fill="#1E3A8A" opacity="0.1"/>
+    <rect x="45" y="90" width="30" height="12" fill="#1E3A8A"/>
+    <rect x="30" y="102" width="60" height="6" rx="3" fill="#1E3A8A"/>
+  </g>
+  <!-- JovenClub text -->
+  <text x="150" y="195" text-anchor="middle" font-family="serif" font-size="42" font-style="italic" fill="#1E3A8A" font-weight="bold">Joven Club</text>
+  <!-- DE COMPUTACIÓN Y ELECTRÓNICA -->
+  <text x="150" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1E3A8A" letter-spacing="1">DE COMPUTACIÓN Y ELECTRÓNICA</text>
+  <!-- San Luis -->
+  <text x="150" y="270" text-anchor="middle" font-family="serif" font-size="22" font-style="italic" fill="#1E3A8A">San Luis</text>
+</svg>
