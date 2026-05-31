@@ -133,24 +133,32 @@ const TABLES_ORDER = [
   'solicitudesCambio', 'lecturasAnuncio', 'eventosReserva',
 ] as const
 
+let _pushing = false
+
 export async function pushAllToSupabase(
   onProgress?: (table: string, current: number, total: number) => void
 ): Promise<void> {
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) return
-  await clearSyncQueue()
-  for (const name of TABLES_ORDER) {
-    const records = await (db as any)[name].toArray()
-    if (records.length === 0) continue
-    const normalized = records.map((r: any) => normalizeRecord(name, r))
-    onProgress?.(name, 0, normalized.length)
-    const CHUNK = 100
-    for (let i = 0; i < normalized.length; i += CHUNK) {
-      const chunk = normalized.slice(i, i + CHUNK)
-      const { error } = await supabase.from(name).upsert(chunk, { onConflict: 'id' })
-      if (error) throw error
-      onProgress?.(name, Math.min(i + CHUNK, normalized.length), normalized.length)
+  if (_pushing) return
+  _pushing = true
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return
+    await clearSyncQueue()
+    for (const name of TABLES_ORDER) {
+      const records = await (db as any)[name].toArray()
+      if (records.length === 0) continue
+      const normalized = records.map((r: any) => normalizeRecord(name, r))
+      onProgress?.(name, 0, normalized.length)
+      const CHUNK = 100
+      for (let i = 0; i < normalized.length; i += CHUNK) {
+        const chunk = normalized.slice(i, i + CHUNK)
+        const { error } = await supabase.from(name).upsert(chunk, { onConflict: 'id' })
+        if (error) throw error
+        onProgress?.(name, Math.min(i + CHUNK, normalized.length), normalized.length)
+      }
     }
+  } finally {
+    _pushing = false
   }
 }
 
