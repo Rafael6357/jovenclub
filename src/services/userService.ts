@@ -6,19 +6,16 @@ import { addToSyncQueue } from './syncService'
 import { useAuthStore } from '../stores/authStore'
 
 export async function getAllUsers(): Promise<Usuario[]> {
-  const pendientes = await db.colaSincronizacion.count()
-  if (pendientes === 0) {
-    const { data, error } = await supabase.from('usuarios').select('*')
-    if (!error && data) {
-      const supabaseIds = new Set(data.map((u: Usuario) => u.id))
-      for (const u of data) {
-        await db.usuarios.put(u as Usuario)
-      }
-      const local = await db.usuarios.toArray()
-      for (const u of local) {
-        if (!supabaseIds.has(u.id)) {
-          await db.usuarios.delete(u.id)
-        }
+  const currentUser = useAuthStore.getState().usuario
+  if (currentUser?.rolId === 'admin') {
+    const pendientes = await db.colaSincronizacion.count()
+    if (pendientes === 0) {
+      const { data, error } = await supabase.from('usuarios').select('*')
+      if (!error && data) {
+        const supabaseIds = new Set(data.map((u: Usuario) => u.id))
+        for (const u of data) await db.usuarios.put(u as Usuario)
+        const local = await db.usuarios.toArray()
+        for (const u of local) if (!supabaseIds.has(u.id)) await db.usuarios.delete(u.id)
       }
     }
   }
