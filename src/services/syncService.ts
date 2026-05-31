@@ -104,6 +104,30 @@ export async function clearSyncQueue(): Promise<void> {
   await db.colaSincronizacion.clear()
 }
 
+const KEY_MAP: Record<string, Record<string, string>> = {
+  horarios: { usuarioid: 'usuarioId', diasemana: 'diaSemana', horainicio: 'horaInicio', horafin: 'horaFin', validodesde: 'validoDesde', validohasta: 'validoHasta' },
+  anuncios: { fechapublicacion: 'fechaPublicacion', fechaexpiracion: 'fechaExpiracion', autorid: 'autorId' },
+  adjuntos: { anuncioid: 'anuncioId', nombrearchivo: 'nombreArchivo', tipomime: 'tipoMime', tamanobytes: 'tamanoBytes' },
+  recursos: {},
+  reservas: { recursioid: 'recursoId', usuarioid: 'usuarioId', tituloevento: 'tituloEvento', fechainicio: 'fechaInicio', fechafin: 'fechaFin' },
+  solicitudesCambio: { solicitanteid: 'solicitanteId', reemplazanteid: 'reemplazanteId', fechasolicitud: 'fechaSolicitud', turnooriginal: 'turnoOriginal', turnopropuesto: 'turnoPropuesto' },
+  lecturasAnuncio: { anuncioid: 'anuncioId', usuarioid: 'usuarioId', fechalectura: 'fechaLectura' },
+  eventosReserva: { reservaid: 'reservaId', fecharegistro: 'fechaRegistro' },
+}
+
+function normalizeRecord(tabla: string, record: any): any {
+  const map = KEY_MAP[tabla]
+  if (!map) return record
+  const out: any = { ...record }
+  for (const [oldKey, newKey] of Object.entries(map)) {
+    if (oldKey in out && !(newKey in out)) {
+      out[newKey] = out[oldKey]
+      delete out[oldKey]
+    }
+  }
+  return out
+}
+
 const TABLES_ORDER = [
   'horarios', 'anuncios', 'adjuntos', 'recursos', 'reservas',
   'solicitudesCambio', 'lecturasAnuncio', 'eventosReserva',
@@ -116,13 +140,14 @@ export async function pushAllToSupabase(
   for (const name of TABLES_ORDER) {
     const records = await (db as any)[name].toArray()
     if (records.length === 0) continue
-    onProgress?.(name, 0, records.length)
+    const normalized = records.map((r: any) => normalizeRecord(name, r))
+    onProgress?.(name, 0, normalized.length)
     const CHUNK = 100
-    for (let i = 0; i < records.length; i += CHUNK) {
-      const chunk = records.slice(i, i + CHUNK)
+    for (let i = 0; i < normalized.length; i += CHUNK) {
+      const chunk = normalized.slice(i, i + CHUNK)
       const { error } = await supabase.from(name).upsert(chunk, { onConflict: 'id' })
       if (error) throw error
-      onProgress?.(name, Math.min(i + CHUNK, records.length), records.length)
+      onProgress?.(name, Math.min(i + CHUNK, normalized.length), normalized.length)
     }
   }
 }

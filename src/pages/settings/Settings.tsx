@@ -3,13 +3,13 @@ import { useAuthStore } from '../../stores/authStore'
 import { db } from '../../db/database'
 import { useNavigate } from 'react-router-dom'
 import { updateUser } from '../../services/userService'
-import { procesarCola, getColaCount, clearSyncQueue, pushAllToSupabase } from '../../services/syncService'
+import { procesarCola, getColaCount, clearSyncQueue } from '../../services/syncService'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
-import { Settings as SettingsIcon, RefreshCw, Trash2, User, QrCode, UploadCloud } from 'lucide-react'
+import { Settings as SettingsIcon, RefreshCw, Trash2, User, QrCode } from 'lucide-react'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { useLiveQuery } from '../../hooks/useLiveQuery'
 import QRCode from 'qrcode'
@@ -25,9 +25,6 @@ export function Settings() {
   const [syncing, setSyncing] = useState(false)
   const [msg, setMsg] = useState('')
   const [showClearConfirm, setShowClearConfirm] = useState(false)
-  const [subiendo, setSubiendo] = useState(false)
-  const [progresoSubida, setProgresoSubida] = useState('')
-  const [errorSubida, setErrorSubida] = useState('')
   const [qrDataUrl, setQrDataUrl] = useState('')
 
   useEffect(() => {
@@ -58,23 +55,6 @@ export function Settings() {
     setMsg('Cola de sincronización limpiada')
   }
 
-  const handlePushAll = async () => {
-    setSubiendo(true)
-    setErrorSubida('')
-    setMsg('')
-    try {
-      await pushAllToSupabase((table, current, total) => {
-        setProgresoSubida(`${table}: ${current}/${total}`)
-      })
-      setMsg('Todos los datos se subieron correctamente a la nube')
-      setProgresoSubida('')
-    } catch (err) {
-      setErrorSubida(String(err))
-    } finally {
-      setSubiendo(false)
-    }
-  }
-
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl font-bold text-gray-100">Configuración</h1>
@@ -83,12 +63,6 @@ export function Settings() {
         <div className="bg-green-900/30 text-green-300 text-sm p-3 rounded-lg flex items-center justify-between">
           {msg}
           <button onClick={() => setMsg('')} className="text-green-400 hover:text-green-200">✕</button>
-        </div>
-      )}
-      {errorSubida && (
-        <div className="bg-red-900/30 text-red-300 text-sm p-3 rounded-lg flex items-center justify-between">
-          Error: {errorSubida}
-          <button onClick={() => setErrorSubida('')} className="text-red-400 hover:text-red-200">✕</button>
         </div>
       )}
 
@@ -132,14 +106,6 @@ export function Settings() {
               </Button>
             )}
           </div>
-          {isAdmin() && (
-            <div className="pt-2">
-              <Button onClick={handlePushAll} loading={subiendo} icon={<UploadCloud className="w-4 h-4" />}>
-                {subiendo ? `Subiendo... ${progresoSubida}` : 'Subir todos los datos a la nube'}
-              </Button>
-              {progresoSubida && <p className="text-xs text-gray-400 mt-1">{progresoSubida}</p>}
-            </div>
-          )}
         </div>
       </Card>
 

@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 import { db } from '../db/database'
 import { login as authLogin, register as authRegister, logout as authLogout, loadUserFromSupabase } from '../services/authService'
-import { initSupabaseSync } from '../services/syncService'
+import { initSupabaseSync, pushAllToSupabase } from '../services/syncService'
 import type { Usuario } from '../lib/types'
 
 interface AuthState {
@@ -53,6 +53,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (user) {
           set({ usuario: user, isAuthenticated: true, loading: false })
           initSupabaseSync().catch(() => {})
+          pushAllToSupabase().catch(() => {})
           return
         }
       } catch {}
