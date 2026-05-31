@@ -181,13 +181,22 @@ export async function initSupabaseSync(): Promise<void> {
 // Auto-retry when browser comes back online
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
-    procesarCola()
+    procesarCola((procesados) => {
+      if (procesados > 0) {
+        window.dispatchEvent(new CustomEvent('sync-complete', { detail: { procesados } }))
+      }
+    })
   })
 
   // Periodic retry of the queue (every 30s while there are pending items)
   async function autoRetry() {
     const count = await db.colaSincronizacion.count()
-    if (count > 0) procesarCola()
+    if (count > 0) {
+      const procesados = await procesarCola()
+      if (procesados > 0) {
+        window.dispatchEvent(new CustomEvent('sync-complete', { detail: { procesados } }))
+      }
+    }
   }
   setInterval(autoRetry, 30000)
 }
