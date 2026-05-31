@@ -13,7 +13,7 @@ const allLinks = [
   { to: '/horarios', icon: Calendar, label: 'Horarios', adminOnly: false },
   { to: '/horarios/cambios', icon: ArrowLeftRight, label: 'Cambios Turno', adminOnly: false },
   { to: '/directorio', icon: BookUser, label: 'Directorio', adminOnly: false },
-  { to: '/anuncios', icon: Megaphone, label: 'Anuncios', adminOnly: false },
+  { to: '/anuncios', icon: Megaphone, label: 'Anuncios de Eventos', adminOnly: false },
   { to: '/recursos', icon: Monitor, label: 'Recursos', adminOnly: false },
   { to: '/reservas', icon: CalendarRange, label: 'Reservas', adminOnly: false },
   { to: '/reportes', icon: FileText, label: 'Reportes', adminOnly: false },

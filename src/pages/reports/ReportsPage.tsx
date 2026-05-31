@@ -71,19 +71,7 @@ export function ReportsPage() {
           </Button>
         </div>
       </Card>
-      <Card>
-        <h3 className="font-semibold text-gray-100 mb-3 flex items-center gap-2">
-          <FileText className="w-4 h-4" /> Información
-        </h3>
-        <ul className="text-sm text-gray-300 space-y-2">
-          <li>• Los reportes se generan a partir de los datos almacenados localmente en IndexedDB</li>
-          <li>• Funciona completamente sin conexión a internet</li>
-          <li>• Los reportes PDF incluyen encabezado con el nombre del Joven Club</li>
-          <li>• Los archivos CSV pueden abrirse en Microsoft Excel o Google Sheets</li>
-          {isAdmin() && <li>• Los reportes globales incluyen datos de todo el personal</li>}
-          {!isAdmin() && <li>• Como instructor, solo puedes generar reportes de tu propia actividad</li>}
-        </ul>
-      </Card>
+
     </div>
   )
 }

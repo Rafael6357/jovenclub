@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
-import { createReserva, validarOverlapReserva } from '../../services/bookingService'
+import { createReserva, updateReserva, getReservaById, validarOverlapReserva } from '../../services/bookingService'
 import { getAllRecursos } from '../../services/resourceService'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -13,7 +13,9 @@ import { Link } from 'react-router-dom'
 
 export function BookingForm() {
   const navigate = useNavigate()
+  const { id } = useParams()
   const { usuario } = useAuthStore()
+  const isEditing = !!id
   const [recursos, setRecursos] = useState<any[]>([])
   const [form, setForm] = useState({
     recursoId: '', tituloEvento: '', descripcion: '', fechaInicio: '', fechaFin: '', asistentes: '1',
@@ -23,26 +25,48 @@ export function BookingForm() {
 
   useEffect(() => {
     getAllRecursos().then(r => setRecursos(r.filter(x => x.disponible)))
-  }, [])
+    if (id) {
+      getReservaById(id).then(r => {
+        if (r) setForm({
+          recursoId: r.recursoId,
+          tituloEvento: r.tituloEvento,
+          descripcion: '',
+          fechaInicio: r.fechaInicio.slice(0, 16),
+          fechaFin: r.fechaFin.slice(0, 16),
+          asistentes: String(r.asistentes),
+        })
+      })
+    }
+  }, [id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const overlap = await validarOverlapReserva(form.recursoId, form.fechaInicio, form.fechaFin)
+    const overlap = await validarOverlapReserva(form.recursoId, form.fechaInicio, form.fechaFin, id)
     if (overlap) {
       setError(`Conflicto: recurso ya reservado de ${overlap.fechaInicio.split('T')[1]?.slice(0, 5)} a ${overlap.fechaFin.split('T')[1]?.slice(0, 5)}`)
       setLoading(false)
       return
     }
-    await createReserva({
-      recursoId: form.recursoId,
-      usuarioId: usuario!.id,
-      tituloEvento: form.tituloEvento,
-      fechaInicio: form.fechaInicio,
-      fechaFin: form.fechaFin,
-      asistentes: Number(form.asistentes),
-    })
+    if (isEditing && id) {
+      await updateReserva(id, {
+        recursoId: form.recursoId,
+        tituloEvento: form.tituloEvento,
+        fechaInicio: form.fechaInicio,
+        fechaFin: form.fechaFin,
+        asistentes: Number(form.asistentes),
+      })
+    } else {
+      await createReserva({
+        recursoId: form.recursoId,
+        usuarioId: usuario!.id,
+        tituloEvento: form.tituloEvento,
+        fechaInicio: form.fechaInicio,
+        fechaFin: form.fechaFin,
+        asistentes: Number(form.asistentes),
+      })
+    }
     navigate('/reservas')
     setLoading(false)
   }
@@ -51,7 +75,7 @@ export function BookingForm() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
         <Link to="/reservas"><Button variant="ghost" icon={<ArrowLeft className="w-4 h-4" />}>Volver</Button></Link>
-        <h1 className="text-2xl font-bold text-gray-100">Nueva Reserva</h1>
+        <h1 className="text-2xl font-bold text-gray-100">{isEditing ? 'Editar Reserva' : 'Nueva Reserva'}</h1>
       </div>
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,7 +97,7 @@ export function BookingForm() {
           <Input id="asistentes" label="Número de asistentes" type="number" min="1" value={form.asistentes} onChange={e => setForm(f => ({ ...f, asistentes: e.target.value }))} />
           <div className="flex justify-end gap-3 pt-4">
             <Link to="/reservas"><Button variant="secondary" type="button">Cancelar</Button></Link>
-            <Button type="submit" loading={loading}>Crear Reserva</Button>
+            <Button type="submit" loading={loading}>{isEditing ? 'Guardar Cambios' : 'Crear Reserva'}</Button>
           </div>
         </form>
       </Card>

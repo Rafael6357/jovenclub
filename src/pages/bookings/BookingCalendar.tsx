@@ -10,7 +10,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { formatDate, formatTime } from '../../lib/utils'
-import { Plus, CalendarRange, X as XIcon } from 'lucide-react'
+import { Plus, CalendarRange, X as XIcon, Pencil } from 'lucide-react'
 
 export function BookingCalendar() {
   const { usuario, isAdmin } = useAuthStore()
@@ -67,9 +67,16 @@ export function BookingCalendar() {
                     {formatDate(r.fechaInicio)} | {r.fechaInicio.split('T')[1]?.slice(0, 5)} - {r.fechaFin.split('T')[1]?.slice(0, 5)} | {r.asistentes} asistente{r.asistentes !== 1 ? 's' : ''}
                   </p>
                 </div>
-                {r.estado === 'confirmada' && (isAdmin() || r.usuarioId === usuario?.id) && (
-                  <Button variant="danger" size="sm" onClick={() => setCancelId(r.id)} icon={<XIcon className="w-4 h-4" />}>Cancelar</Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {isAdmin() && (
+                    <Link to={`/reservas/${r.id}/editar`}>
+                      <Button variant="ghost" size="sm" icon={<Pencil className="w-4 h-4" />}>Editar</Button>
+                    </Link>
+                  )}
+                  {r.estado === 'confirmada' && (isAdmin() || r.usuarioId === usuario?.id) && (
+                    <Button variant="danger" size="sm" onClick={() => setCancelId(r.id)} icon={<XIcon className="w-4 h-4" />}>Cancelar</Button>
+                  )}
+                </div>
               </div>
             </Card>
           ))}

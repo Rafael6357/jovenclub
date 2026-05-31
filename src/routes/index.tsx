@@ -51,6 +51,7 @@ export function AppRoutes() {
             <Route path="/anuncios/:id/editar" element={<AnnouncementForm />} />
             <Route path="/recursos/nuevo" element={<ResourceForm />} />
             <Route path="/recursos/:id/editar" element={<ResourceForm />} />
+            <Route path="/reservas/:id/editar" element={<BookingForm />} />
           </Route>
         </Route>
       </Route>

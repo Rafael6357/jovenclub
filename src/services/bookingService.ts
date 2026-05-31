@@ -7,6 +7,10 @@ export async function getAllReservas(): Promise<Reserva[]> {
   return db.reservas.toArray()
 }
 
+export async function getReservaById(id: string): Promise<Reserva | undefined> {
+  return db.reservas.get(id)
+}
+
 export async function getReservasByUsuario(usuarioId: string): Promise<Reserva[]> {
   return db.reservas.where('usuarioId').equals(usuarioId).toArray()
 }
