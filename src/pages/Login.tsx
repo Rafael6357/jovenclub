@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, QrCode } from 'lucide-react'
 
 export function Login() {
   const [email, setEmail] = useState('')
@@ -88,6 +88,11 @@ export function Login() {
           <div className="text-center text-sm text-gray-400">
             ¿No tienes cuenta?{' '}
             <Link to="/register" className="text-primary-400 hover:underline font-medium">Regístrate</Link>
+          </div>
+          <div className="pt-4 border-t border-gray-700 text-center">
+            <Link to="/tablero" className="text-primary-400 hover:text-primary-300 text-sm flex items-center justify-center gap-1.5 transition-colors">
+              <QrCode className="w-4 h-4" /> Ver tablero público
+            </Link>
           </div>
           <div className="text-xs text-gray-400 text-center mt-2">
             <p>Autenticación mediante Supabase</p>
