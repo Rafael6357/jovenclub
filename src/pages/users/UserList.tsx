@@ -42,7 +42,7 @@ export function UserList() {
     try {
       await deleteUser(deleteModal)
       setDeleteModal(null)
-      load()
+      await load()
     } catch (err: any) {
       setDeleteError(err?.message || 'Error al eliminar usuario')
     }
