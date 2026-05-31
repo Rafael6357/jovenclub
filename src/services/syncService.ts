@@ -105,6 +105,7 @@ export async function clearSyncQueue(): Promise<void> {
 }
 
 const KEY_MAP: Record<string, Record<string, string>> = {
+  usuarios: { rolid: 'rolId' },
   horarios: { usuarioid: 'usuarioId', diasemana: 'diaSemana', horainicio: 'horaInicio', horafin: 'horaFin', validodesde: 'validoDesde', validohasta: 'validoHasta' },
   anuncios: { fechapublicacion: 'fechaPublicacion', fechaexpiracion: 'fechaExpiracion', autorid: 'autorId' },
   adjuntos: { anuncioid: 'anuncioId', nombrearchivo: 'nombreArchivo', tipomime: 'tipoMime', tamanobytes: 'tamanoBytes' },
@@ -129,8 +130,8 @@ function normalizeRecord(tabla: string, record: any): any {
 }
 
 const TABLES_ORDER = [
-  'horarios', 'anuncios', 'adjuntos', 'recursos', 'reservas',
-  'solicitudesCambio', 'lecturasAnuncio', 'eventosReserva',
+  'usuarios', 'horarios', 'anuncios', 'adjuntos', 'recursos',
+  'reservas', 'solicitudesCambio', 'lecturasAnuncio', 'eventosReserva',
 ] as const
 
 let _pushing = false
