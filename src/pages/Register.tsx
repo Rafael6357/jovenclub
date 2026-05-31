@@ -66,7 +66,7 @@ export function Register() {
           {error && <div className="bg-red-900/30 text-red-300 text-sm p-3 rounded-lg">{error}</div>}
           <Input id="nombre" label="Nombre completo" value={nombre} onChange={e => setNombre(e.target.value)} required />
           <Input id="email" label="Correo electrónico" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-          <Input id="telefono" label="Teléfono" value={telefono} onChange={e => setTelefono(e.target.value)} />
+          <Input id="telefono" label="Teléfono" value={telefono} onChange={e => setTelefono(e.target.value)} required />
           <div className="w-full">
             <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">Contraseña</label>
             <div className="relative">
