@@ -91,7 +91,7 @@ export function Login() {
           </div>
           <div className="pt-4 border-t border-gray-700 text-center">
             <Link to="/tablero" className="text-primary-400 hover:text-primary-300 text-sm flex items-center justify-center gap-1.5 transition-colors">
-              <QrCode className="w-4 h-4" /> Ver tablero público
+              <QrCode className="w-4 h-4" /> Entrar como invitado
             </Link>
           </div>
           <div className="text-xs text-gray-400 text-center mt-2">
