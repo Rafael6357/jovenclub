@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { db } from '../../db/database'
 import { useNavigate } from 'react-router-dom'
 import { updateUser } from '../../services/userService'
-import { procesarCola, getColaCount, clearSyncQueue } from '../../services/syncService'
+import { procesarCola, getColaCount, clearSyncQueue, pushAllToSupabase } from '../../services/syncService'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
-import { Settings as SettingsIcon, RefreshCw, Trash2, User } from 'lucide-react'
+import { Modal } from '../../components/ui/Modal'
+import { Settings as SettingsIcon, RefreshCw, Trash2, User, QrCode, UploadCloud } from 'lucide-react'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { useLiveQuery } from '../../hooks/useLiveQuery'
+import QRCode from 'qrcode'
 
 export function Settings() {
   const { usuario, isAdmin } = useAuthStore()
@@ -22,6 +24,16 @@ export function Settings() {
   const [loading, setLoading] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [msg, setMsg] = useState('')
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [subiendo, setSubiendo] = useState(false)
+  const [progresoSubida, setProgresoSubida] = useState('')
+  const [errorSubida, setErrorSubida] = useState('')
+  const [qrDataUrl, setQrDataUrl] = useState('')
+
+  useEffect(() => {
+    const url = `${window.location.origin}/tablero`
+    QRCode.toDataURL(url, { width: 250, margin: 2, color: { dark: '#e5e7eb', light: '#1f2937' } }).then(setQrDataUrl)
+  }, [])
 
   const handleSave = async () => {
     if (!usuario) return
@@ -42,28 +54,52 @@ export function Settings() {
 
   const handleClearQueue = async () => {
     await clearSyncQueue()
+    setShowClearConfirm(false)
     setMsg('Cola de sincronización limpiada')
+  }
+
+  const handlePushAll = async () => {
+    setSubiendo(true)
+    setErrorSubida('')
+    setMsg('')
+    try {
+      await pushAllToSupabase((table, current, total) => {
+        setProgresoSubida(`${table}: ${current}/${total}`)
+      })
+      setMsg('Todos los datos se subieron correctamente a la nube')
+      setProgresoSubida('')
+    } catch (err) {
+      setErrorSubida(String(err))
+    } finally {
+      setSubiendo(false)
+    }
   }
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
+      <h1 className="text-2xl font-bold text-gray-100">Configuración</h1>
 
       {msg && (
-        <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg flex items-center justify-between">
+        <div className="bg-green-900/30 text-green-300 text-sm p-3 rounded-lg flex items-center justify-between">
           {msg}
-          <button onClick={() => setMsg('')} className="text-green-500 hover:text-green-700">✕</button>
+          <button onClick={() => setMsg('')} className="text-green-400 hover:text-green-200">✕</button>
+        </div>
+      )}
+      {errorSubida && (
+        <div className="bg-red-900/30 text-red-300 text-sm p-3 rounded-lg flex items-center justify-between">
+          Error: {errorSubida}
+          <button onClick={() => setErrorSubida('')} className="text-red-400 hover:text-red-200">✕</button>
         </div>
       )}
 
       <Card>
-        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <h3 className="font-semibold text-gray-100 mb-4 flex items-center gap-2">
           <User className="w-4 h-4" /> Mi Perfil
         </h3>
         <div className="space-y-4">
           <Input id="nombre" label="Nombre" value={nombre} onChange={e => setNombre(e.target.value)} />
           <Input id="telefono" label="Teléfono" value={telefono} onChange={e => setTelefono(e.target.value)} />
-          <Input id="email" label="Email" value={usuario?.email || ''} disabled />
+          <Input id="email" label="Correo electrónico" value={usuario?.email || ''} disabled />
           <Badge variant={usuario?.rolId === 'admin' ? 'info' : 'default'}>
             {usuario?.rolId === 'admin' ? 'Administrador' : 'Instructor'}
           </Badge>
@@ -72,18 +108,18 @@ export function Settings() {
       </Card>
 
       <Card>
-        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <h3 className="font-semibold text-gray-100 mb-4 flex items-center gap-2">
           <SettingsIcon className="w-4 h-4" /> Sincronización
         </h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">Estado:</span>
+            <span className="text-sm text-gray-300">Estado:</span>
             <Badge variant={isOnline ? 'success' : 'danger'}>
               {isOnline ? 'Conectado' : 'Sin conexión'}
             </Badge>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">Cambios pendientes:</span>
+            <span className="text-sm text-gray-300">Cambios pendientes:</span>
             <Badge variant={colaCount > 0 ? 'warning' : 'default'}>{colaCount}</Badge>
           </div>
           <div className="flex gap-3">
@@ -91,17 +127,62 @@ export function Settings() {
               Sincronizar ahora
             </Button>
             {isAdmin() && (
-              <Button onClick={handleClearQueue} icon={<Trash2 className="w-4 h-4" />} variant="ghost">
+              <Button onClick={() => setShowClearConfirm(true)} icon={<Trash2 className="w-4 h-4" />} variant="ghost">
                 Limpiar cola
               </Button>
             )}
           </div>
+          {isAdmin() && (
+            <div className="pt-2">
+              <Button onClick={handlePushAll} loading={subiendo} icon={<UploadCloud className="w-4 h-4" />}>
+                {subiendo ? `Subiendo... ${progresoSubida}` : 'Subir todos los datos a la nube'}
+              </Button>
+              {progresoSubida && <p className="text-xs text-gray-400 mt-1">{progresoSubida}</p>}
+            </div>
+          )}
         </div>
       </Card>
 
       <Card>
-        <h3 className="font-semibold text-gray-900 mb-2">Acerca de</h3>
-        <div className="text-sm text-gray-600 space-y-1">
+        <h3 className="font-semibold text-gray-100 mb-4 flex items-center gap-2">
+          <QrCode className="w-4 h-4" /> Tablero Público
+        </h3>
+        <div className="space-y-3">
+          <p className="text-sm text-gray-300">
+            Escanee este código QR con su teléfono para ver los anuncios, horarios del personal y reservas disponibles.
+          </p>
+          <div className="flex justify-center">
+            {qrDataUrl ? (
+              <img src={qrDataUrl} alt="QR Tablero Público" className="rounded-lg" />
+            ) : (
+              <div className="w-[250px] h-[250px] bg-gray-800 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500 text-sm">Generando QR...</span>
+              </div>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 text-center break-all">
+            {window.location.origin}/tablero
+          </p>
+          <Button
+            variant="secondary"
+            onClick={() => window.open('/tablero', '_blank')}
+          >
+            Abrir tablero público
+          </Button>
+        </div>
+      </Card>
+
+      <Modal open={showClearConfirm} onClose={() => setShowClearConfirm(false)} title="Limpiar cola de sincronización" size="sm">
+        <p className="text-gray-300 mb-4">¿Estás seguro de limpiar la cola? Los cambios pendientes no se enviarán a la nube y se perderán.</p>
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={() => setShowClearConfirm(false)}>Cancelar</Button>
+          <Button variant="danger" onClick={handleClearQueue}>Limpiar</Button>
+        </div>
+      </Modal>
+
+      <Card>
+        <h3 className="font-semibold text-gray-100 mb-2">Acerca de</h3>
+        <div className="text-sm text-gray-300 space-y-1">
           <p><strong>COMUNICA-JC</strong> v1.0.0</p>
           <p>Joven Club de Computación y Electrónica de San Luis</p>
           <p>Santiago de Cuba</p>

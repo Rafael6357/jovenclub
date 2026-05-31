@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getAllUsers, deleteUser } from '../../services/userService'
+import { useAuthStore } from '../../stores/authStore'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
@@ -11,10 +12,12 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { Plus, Pencil, Trash2, Search, Users } from 'lucide-react'
 
 export function UserList() {
+  const currentUser = useAuthStore(s => s.usuario)
   const [users, setUsers] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [deleteModal, setDeleteModal] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [deleteError, setDeleteError] = useState('')
 
   const load = async () => {
     const all = await getAllUsers()
@@ -30,17 +33,25 @@ export function UserList() {
   )
 
   const handleDelete = async () => {
-    if (deleteModal) {
+    if (!deleteModal) return
+    if (currentUser && deleteModal === currentUser.id) {
+      setDeleteError('No puedes eliminarte a ti mismo')
+      return
+    }
+    setDeleteError('')
+    try {
       await deleteUser(deleteModal)
       setDeleteModal(null)
       load()
+    } catch (err: any) {
+      setDeleteError(err?.message || 'Error al eliminar usuario')
     }
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+        <h1 className="text-2xl font-bold text-gray-100">Gestión de Usuarios</h1>
         <Link to="/usuarios/nuevo">
           <Button icon={<Plus className="w-4 h-4" />}>Nuevo Usuario</Button>
         </Link>
@@ -53,7 +64,7 @@ export function UserList() {
           placeholder="Buscar por nombre o email..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+          className="w-full pl-10 pr-3 py-2 bg-gray-900 text-gray-100 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
         />
       </div>
 
@@ -65,37 +76,39 @@ export function UserList() {
         <Card padding={false}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-900 text-gray-300 border-b">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Usuario</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Rol</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Teléfono</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Acciones</th>
+                  <th className="text-left px-4 py-3 font-medium">Usuario</th>
+                  <th className="text-left px-4 py-3 font-medium">Email</th>
+                  <th className="text-left px-4 py-3 font-medium">Rol</th>
+                  <th className="text-left px-4 py-3 font-medium">Teléfono</th>
+                  <th className="text-right px-4 py-3 font-medium">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filtered.map(u => (
-                  <tr key={u.id} className="hover:bg-gray-50">
+                  <tr key={u.id} className="hover:bg-gray-700">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <Avatar nombre={u.nombre} size="sm" />
+                        <Avatar name={u.nombre} size="sm" />
                         <span className="font-medium">{u.nombre}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{u.email}</td>
+                    <td className="px-4 py-3 text-gray-300">{u.email}</td>
                     <td className="px-4 py-3">
                       <Badge variant={u.rolId === 'admin' ? 'info' : 'default'}>
                         {u.rolId === 'admin' ? 'Administrador' : 'Instructor'}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{u.telefono}</td>
+                    <td className="px-4 py-3 text-gray-300">{u.telefono}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
                         <Link to={`/usuarios/${u.id}/editar`}>
                           <Button variant="ghost" size="sm" icon={<Pencil className="w-4 h-4" />}>Editar</Button>
                         </Link>
-                        <Button variant="ghost" size="sm" icon={<Trash2 className="w-4 h-4 text-red-500" />} onClick={() => setDeleteModal(u.id)} />
+                        {currentUser && u.id !== currentUser.id && (
+                          <Button variant="ghost" size="sm" icon={<Trash2 className="w-4 h-4 text-red-400" />} onClick={() => { setDeleteError(''); setDeleteModal(u.id) }} />
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -106,10 +119,11 @@ export function UserList() {
         </Card>
       )}
 
-      <Modal open={!!deleteModal} onClose={() => setDeleteModal(null)} title="Confirmar eliminación" size="sm">
-        <p className="text-gray-600 mb-4">¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.</p>
+      <Modal open={!!deleteModal} onClose={() => { setDeleteError(''); setDeleteModal(null) }} title="Confirmar eliminación" size="sm">
+        <p className="text-gray-300 mb-4">¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.</p>
+        {deleteError && <p className="text-red-400 text-sm mb-4">{deleteError}</p>}
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => setDeleteModal(null)}>Cancelar</Button>
+          <Button variant="secondary" onClick={() => { setDeleteError(''); setDeleteModal(null) }}>Cancelar</Button>
           <Button variant="danger" onClick={handleDelete}>Eliminar</Button>
         </div>
       </Modal>

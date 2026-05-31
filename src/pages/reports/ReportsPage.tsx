@@ -7,7 +7,7 @@ import { FileText, Download } from 'lucide-react'
 import {
   reporteHorariosPDF, reporteAnunciosPDF, reporteReservasPDF,
   reporteHorariosCSV, reporteAnunciosCSV, reporteReservasCSV,
-  reporteUsuarioHorariosPDF,
+  reporteUsuarioHorariosPDF, reporteUsuarioHorariosCSV,
 } from '../../services/reportService'
 
 export function ReportsPage() {
@@ -15,6 +15,7 @@ export function ReportsPage() {
   const [tipo, setTipo] = useState('horarios')
   const [formato, setFormato] = useState('pdf')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const reportTypes = isAdmin()
     ? [
@@ -27,22 +28,27 @@ export function ReportsPage() {
       ]
 
   const handleGenerate = async () => {
+    setError('')
     setLoading(true)
     try {
-      if (tipo === 'mi_horario') await reporteUsuarioHorariosPDF(usuario!.id)
+      if (tipo === 'mi_horario' && formato === 'pdf') await reporteUsuarioHorariosPDF(usuario!.id)
+      else if (tipo === 'mi_horario' && formato === 'csv') await reporteUsuarioHorariosCSV(usuario!.id)
       else if (tipo === 'horarios' && formato === 'pdf') await reporteHorariosPDF()
       else if (tipo === 'horarios' && formato === 'csv') await reporteHorariosCSV()
       else if (tipo === 'anuncios' && formato === 'pdf') await reporteAnunciosPDF()
       else if (tipo === 'anuncios' && formato === 'csv') await reporteAnunciosCSV()
       else if (tipo === 'reservas' && formato === 'pdf') await reporteReservasPDF()
       else if (tipo === 'reservas' && formato === 'csv') await reporteReservasCSV()
-    } catch (e) { console.error(e) }
+    } catch (e: any) {
+      setError(e?.message || 'Error al generar el reporte.')
+    }
     setLoading(false)
   }
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900">Reportes de Gestión</h1>
+      <h1 className="text-2xl font-bold text-gray-100">Reportes de Gestión</h1>
+      {error && <div className="bg-red-900/30 text-red-300 text-sm p-3 rounded-lg">{error}</div>}
       <Card>
         <div className="space-y-4">
           <Select
@@ -51,27 +57,25 @@ export function ReportsPage() {
             onChange={e => setTipo(e.target.value)}
             options={reportTypes}
           />
-          {tipo !== 'mi_horario' && (
-            <Select
-              id="formato" label="Formato de exportación"
-              value={formato}
-              onChange={e => setFormato(e.target.value)}
-              options={[
-                { value: 'pdf', label: 'PDF' },
-                { value: 'csv', label: 'CSV (Excel)' },
-              ]}
-            />
-          )}
+          <Select
+            id="formato" label="Formato de exportación"
+            value={formato}
+            onChange={e => setFormato(e.target.value)}
+            options={[
+              { value: 'pdf', label: 'PDF' },
+              { value: 'csv', label: 'CSV (Excel)' },
+            ]}
+          />
           <Button onClick={handleGenerate} loading={loading} icon={<Download className="w-4 h-4" />}>
             Generar Reporte
           </Button>
         </div>
       </Card>
       <Card>
-        <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <h3 className="font-semibold text-gray-100 mb-3 flex items-center gap-2">
           <FileText className="w-4 h-4" /> Información
         </h3>
-        <ul className="text-sm text-gray-600 space-y-2">
+        <ul className="text-sm text-gray-300 space-y-2">
           <li>• Los reportes se generan a partir de los datos almacenados localmente en IndexedDB</li>
           <li>• Funciona completamente sin conexión a internet</li>
           <li>• Los reportes PDF incluyen encabezado con el nombre del Joven Club</li>
@@ -83,5 +87,3 @@ export function ReportsPage() {
     </div>
   )
 }
-
-

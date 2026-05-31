@@ -30,7 +30,7 @@ export function ResourceList() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Recursos</h1>
+        <h1 className="text-2xl font-bold text-gray-100">Recursos</h1>
         {isAdmin() && (
           <Link to="/recursos/nuevo"><Button icon={<Plus className="w-4 h-4" />}>Nuevo Recurso</Button></Link>
         )}
@@ -47,13 +47,13 @@ export function ResourceList() {
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold text-gray-900">{r.nombre}</h3>
+                    <h3 className="font-semibold text-gray-100">{r.nombre}</h3>
                     <Badge variant={r.disponible ? 'success' : 'danger'}>
                       {r.disponible ? 'Disponible' : 'No disponible'}
                     </Badge>
                   </div>
                   <Badge variant="info" className="mb-2">{r.tipo}</Badge>
-                  <p className="text-sm text-gray-500">{r.descripcion}</p>
+                  <p className="text-sm text-gray-400">{r.descripcion}</p>
                 </div>
                 {isAdmin() && (
                   <div className="flex gap-1">
@@ -68,7 +68,7 @@ export function ResourceList() {
       )}
 
       <Modal open={!!deleteId} onClose={() => setDeleteId(null)} title="Eliminar recurso" size="sm">
-        <p className="text-gray-600 mb-4">¿Eliminar este recurso?</p>
+        <p className="text-gray-300 mb-4">¿Eliminar este recurso?</p>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={() => setDeleteId(null)}>Cancelar</Button>
           <Button variant="danger" onClick={handleDelete}>Eliminar</Button>

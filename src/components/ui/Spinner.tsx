@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react'
 
 export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const s = { sm: 'w-4 h-4', md: 'w-8 h-8', lg: 'w-12 h-12' }
-  return <Loader2 className={s[size]} />
+  return <Loader2 className={`${s[size]} animate-spin`} />
 }
 
 export function PageLoader() {

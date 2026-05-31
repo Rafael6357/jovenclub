@@ -1,17 +1,23 @@
-import { doc, setDoc, deleteDoc, getDocs, collection, writeBatch } from 'firebase/firestore'
-import { firestore } from '../lib/firebase'
+import { supabase } from '../lib/supabase'
 import { db } from '../db/database'
 import type { ColaSincronizacion } from '../lib/types'
 import { generateId, nowISO } from '../lib/utils'
 
-async function pushToFirestore(
+const MAX_RETRIES = 5
+
+function isValidUUID(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+}
+
+async function pushToSupabase(
   tabla: string, registroId: string, accion: 'INSERT' | 'UPDATE' | 'DELETE', datos: unknown
 ): Promise<void> {
-  const ref = doc(firestore, tabla, registroId)
   if (accion === 'DELETE') {
-    await deleteDoc(ref)
+    const { error } = await supabase.from(tabla).delete().eq('id', registroId)
+    if (error) throw error
   } else {
-    await setDoc(ref, JSON.parse(JSON.stringify(datos)), { merge: true })
+    const { error } = await supabase.from(tabla).upsert(datos as any, { onConflict: 'id' })
+    if (error) throw error
   }
 }
 
@@ -29,8 +35,14 @@ export async function addToSyncQueue(
     lastError: null,
   }
   await db.colaSincronizacion.add(entry)
+  if (tabla === '_auth_user') {
+    return
+  }
+  if (tabla === 'usuarios' && !isValidUUID(registroId)) {
+    return
+  }
   try {
-    await pushToFirestore(tabla, registroId, accion, datos)
+    await pushToSupabase(tabla, registroId, accion, datos)
     await db.colaSincronizacion.delete(entry.id)
   } catch {
     // Failed (offline) - stays in queue
@@ -41,9 +53,32 @@ export async function procesarCola(callback?: (procesados: number) => void): Pro
   const cola = await db.colaSincronizacion.orderBy('fechaCreacion').toArray()
   let procesados = 0
   for (const entry of cola) {
+    if (entry.tabla === 'usuarios' && !isValidUUID(entry.registroId)) {
+      await db.colaSincronizacion.delete(entry.id)
+      continue
+    }
+    if (entry.tabla === '_auth_user') {
+      try {
+        const { error } = await supabase.functions.invoke('delete-user', { body: { id: entry.registroId } })
+        if (error) throw new Error(error)
+        await db.colaSincronizacion.delete(entry.id)
+        procesados++
+      } catch (err) {
+        await db.colaSincronizacion.update(entry.id, {
+          intentado: entry.intentado + 1,
+          lastError: String(err),
+        })
+      }
+      continue
+    }
+    if (entry.intentado >= MAX_RETRIES) {
+      // Mark as permanently failed and skip
+      await db.colaSincronizacion.update(entry.id, { lastError: 'Máximo de reintentos alcanzado' })
+      continue
+    }
     try {
       const datos = JSON.parse(entry.datos)
-      await pushToFirestore(entry.tabla, entry.registroId, entry.accion, datos)
+      await pushToSupabase(entry.tabla, entry.registroId, entry.accion, datos)
       await db.colaSincronizacion.delete(entry.id)
       procesados++
     } catch (err) {
@@ -69,24 +104,65 @@ export async function clearSyncQueue(): Promise<void> {
   await db.colaSincronizacion.clear()
 }
 
-export async function initFirestoreListener(): Promise<void> {
+const TABLES_ORDER = [
+  'horarios', 'anuncios', 'adjuntos', 'recursos', 'reservas',
+  'solicitudesCambio', 'lecturasAnuncio', 'eventosReserva',
+] as const
+
+export async function pushAllToSupabase(
+  onProgress?: (table: string, current: number, total: number) => void
+): Promise<void> {
+  await clearSyncQueue()
+  for (const name of TABLES_ORDER) {
+    const records = await (db as any)[name].toArray()
+    if (records.length === 0) continue
+    onProgress?.(name, 0, records.length)
+    const CHUNK = 100
+    for (let i = 0; i < records.length; i += CHUNK) {
+      const chunk = records.slice(i, i + CHUNK)
+      const { error } = await supabase.from(name).upsert(chunk, { onConflict: 'id' })
+      if (error) throw error
+      onProgress?.(name, Math.min(i + CHUNK, records.length), records.length)
+    }
+  }
+}
+
+export async function initSupabaseSync(): Promise<void> {
+  // Only sync if there are no pending local changes to avoid overwriting unsynced data
+  const pendientes = await db.colaSincronizacion.count()
+  if (pendientes > 0) return
+
   const collections = [
     'usuarios', 'horarios', 'anuncios', 'recursos', 'reservas',
     'solicitudesCambio', 'lecturasAnuncio', 'adjuntos', 'eventosReserva',
   ]
   for (const name of collections) {
-    const snap = await getDocs(collection(firestore, name))
-    for (const docSnap of snap.docs) {
-      const data = docSnap.data()
-      if (name === 'usuarios') await db.usuarios.put(data as any)
-      else if (name === 'horarios') await db.horarios.put(data as any)
-      else if (name === 'anuncios') await db.anuncios.put(data as any)
-      else if (name === 'recursos') await db.recursos.put(data as any)
-      else if (name === 'reservas') await db.reservas.put(data as any)
-      else if (name === 'solicitudesCambio') await db.solicitudesCambio.put(data as any)
-      else if (name === 'lecturasAnuncio') await db.lecturasAnuncio.put(data as any)
-      else if (name === 'adjuntos') await db.adjuntos.put(data as any)
-      else if (name === 'eventosReserva') await db.eventosReserva.put(data as any)
+    const { data, error } = await supabase.from(name).select('*')
+    if (error || !data) continue
+    for (const item of data) {
+      if (name === 'usuarios') await db.usuarios.put(item as any)
+      else if (name === 'horarios') await db.horarios.put(item as any)
+      else if (name === 'anuncios') await db.anuncios.put(item as any)
+      else if (name === 'recursos') await db.recursos.put(item as any)
+      else if (name === 'reservas') await db.reservas.put(item as any)
+      else if (name === 'solicitudesCambio') await db.solicitudesCambio.put(item as any)
+      else if (name === 'lecturasAnuncio') await db.lecturasAnuncio.put(item as any)
+      else if (name === 'adjuntos') await db.adjuntos.put(item as any)
+      else if (name === 'eventosReserva') await db.eventosReserva.put(item as any)
     }
   }
+}
+
+// Auto-retry when browser comes back online
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    procesarCola()
+  })
+
+  // Periodic retry of the queue (every 30s while there are pending items)
+  async function autoRetry() {
+    const count = await db.colaSincronizacion.count()
+    if (count > 0) procesarCola()
+  }
+  setInterval(autoRetry, 30000)
 }

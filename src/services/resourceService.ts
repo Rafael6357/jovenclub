@@ -8,7 +8,7 @@ export async function getAllRecursos(): Promise<Recurso[]> {
 }
 
 export async function getRecursosDisponibles(): Promise<Recurso[]> {
-  return db.recursos.where('disponible').equals(1).toArray()
+  return db.recursos.where('disponible').equals(true as any).toArray()
 }
 
 export async function getRecursoById(id: string): Promise<Recurso | undefined> {

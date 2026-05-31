@@ -41,7 +41,7 @@ export function BookingCalendar() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Reservas de Recursos</h1>
+        <h1 className="text-2xl font-bold text-gray-100">Reservas de Recursos</h1>
         <Link to="/reservas/nueva"><Button icon={<Plus className="w-4 h-4" />}>Nueva Reserva</Button></Link>
       </div>
 
@@ -61,8 +61,8 @@ export function BookingCalendar() {
                       {r.estado === 'confirmada' ? 'Confirmada' : 'Cancelada'}
                     </Badge>
                   </div>
-                  <p className="text-sm text-gray-500">Recurso: {recursoMap.get(r.recursoId) || 'N/A'}</p>
-                  <p className="text-sm text-gray-500">Solicitante: {userMap.get(r.usuarioId) || 'N/A'}</p>
+                  <p className="text-sm text-gray-400">Recurso: {recursoMap.get(r.recursoId) || 'N/D'}</p>
+                  <p className="text-sm text-gray-400">Solicitante: {userMap.get(r.usuarioId) || 'N/D'}</p>
                   <p className="text-xs text-gray-400 mt-1">
                     {formatDate(r.fechaInicio)} | {r.fechaInicio.split('T')[1]?.slice(0, 5)} - {r.fechaFin.split('T')[1]?.slice(0, 5)} | {r.asistentes} asistente{r.asistentes !== 1 ? 's' : ''}
                   </p>
@@ -77,7 +77,7 @@ export function BookingCalendar() {
       )}
 
       <Modal open={!!cancelId} onClose={() => setCancelId(null)} title="Cancelar reserva" size="sm">
-        <p className="text-gray-600 mb-4">¿Cancelar esta reserva? Esta acción quedará registrada.</p>
+        <p className="text-gray-300 mb-4">¿Cancelar esta reserva? Esta acción quedará registrada.</p>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={() => setCancelId(null)}>No, mantener</Button>
           <Button variant="danger" onClick={handleCancel}>Sí, cancelar</Button>

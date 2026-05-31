@@ -1,9 +1,8 @@
 import { create } from 'zustand'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../lib/firebase'
+import { supabase } from '../lib/supabase'
 import { db } from '../db/database'
-import { initFirestoreListener } from '../services/syncService'
-import { login as authLogin, register as authRegister, logout as authLogout, loadUserFromFirestore } from '../services/authService'
+import { login as authLogin, register as authRegister, logout as authLogout, loadUserFromSupabase } from '../services/authService'
+import { initSupabaseSync } from '../services/syncService'
 import type { Usuario } from '../lib/types'
 
 interface AuthState {
@@ -23,23 +22,47 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: true,
 
   init: () => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        let user: Usuario | null = (await db.usuarios.get(firebaseUser.uid)) ?? null
-        if (!user) {
-          user = await loadUserFromFirestore(firebaseUser.uid)
-        }
-        if (user) {
-          set({ usuario: user, isAuthenticated: true, loading: false })
-          initFirestoreListener().catch(() => {})
-        } else {
-          set({ usuario: null, isAuthenticated: false, loading: false })
-        }
+    // Safety timeout — 5s max loading screen
+    const timeout = setTimeout(() => set({ loading: false }), 5000)
+
+    // 1) Try to recover existing session immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) { clearTimeout(timeout); set({ loading: false }); return }
+      resolveSession(session.user.id)
+    }).catch(() => { clearTimeout(timeout); set({ loading: false }) })
+
+    // 2) Subscribe to future auth events (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      clearTimeout(timeout)
+      if (session?.user) {
+        resolveSession(session.user.id)
       } else {
         set({ usuario: null, isAuthenticated: false, loading: false })
       }
     })
-    return unsubscribe
+
+    async function resolveSession(uid: string) {
+      try {
+        let user: Usuario | null = (await db.usuarios.get(uid)) ?? null
+        if (!user) {
+          // Retry once — da tiempo a que adminService guarde el usuario localmente
+          await new Promise(r => setTimeout(r, 300))
+          user = (await db.usuarios.get(uid)) ?? null
+        }
+        if (!user) user = await loadUserFromSupabase(uid)
+        if (user) {
+          set({ usuario: user, isAuthenticated: true, loading: false })
+          initSupabaseSync().catch(() => {})
+          return
+        }
+      } catch {}
+      set({ usuario: null, isAuthenticated: false, loading: false })
+    }
+
+    return () => {
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   },
 
   login: async (email: string, password: string) => {

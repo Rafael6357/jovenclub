@@ -9,7 +9,7 @@ type Props = {
 
 export function Card({ children, className, padding = true }: Props) {
   return (
-    <div className={classNames('bg-white rounded-xl shadow-sm border border-gray-200', padding && 'p-6', className)}>
+    <div className={classNames('bg-gray-800 rounded-xl shadow-sm shadow-black/30 border border-gray-700', padding && 'p-6', className)}>
       {children}
     </div>
   )
@@ -20,5 +20,5 @@ export function CardHeader({ children, className }: { children: ReactNode; class
 }
 
 export function CardTitle({ children, className }: { children: ReactNode; className?: string }) {
-  return <h3 className={classNames('text-lg font-semibold text-gray-900', className)}>{children}</h3>
+  return <h3 className={classNames('text-lg font-semibold text-gray-100', className)}>{children}</h3>
 }

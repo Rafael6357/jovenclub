@@ -31,7 +31,7 @@ export class ComunicaJCDB extends Dexie {
       recursos: 'id, tipo, disponible',
       reservas: 'id, recursoId, usuarioId, estado',
       eventosReserva: 'id, reservaId',
-      colaSincronizacion: 'id, tabla, registroId, estado, fechaCreacion',
+      colaSincronizacion: 'id, tabla, registroId, accion, fechaCreacion',
     }).upgrade(async trans => {
       await trans.table('roles').clear()
       await trans.table('usuarios').clear()

@@ -27,6 +27,7 @@ export function ShiftSwap() {
   const [loading, setLoading] = useState(true)
 
   const load = async () => {
+    if (!usuario && !isAdmin()) return
     const [sols, users, horarios] = await Promise.all([
       isAdmin() ? getAllSolicitudes() : getSolicitudesBySolicitante(usuario!.id),
       getAllUsers(),
@@ -52,8 +53,9 @@ export function ShiftSwap() {
     e.preventDefault()
     const diaNombre = DIAS_SEMANA.find(d => d.id === Number(form.diaPropuesto))?.nombre || ''
     const turnoPropuesto = `${diaNombre} ${form.horaInicioPropuesto}-${form.horaFinPropuesto}`
+    if (!usuario) return
     await createSolicitud({
-      solicitanteId: usuario!.id,
+      solicitanteId: usuario.id,
       reemplazanteId: form.reemplazanteId,
       turnoOriginal: form.turnoOriginalTexto,
       turnoPropuesto,
@@ -78,14 +80,14 @@ export function ShiftSwap() {
     setForm(f => ({
       ...f,
       turnoOriginalId: h.id,
-      turnoOriginalTexto: `${diaNombre} ${h.horaInicio}-${h.horaFin}${h.sede ? ` | ${h.sede}` : ''}`,
+      turnoOriginalTexto: `${diaNombre} ${h.horaInicio}-${h.horaFin}`,
     }))
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Solicitudes de Cambio de Turno</h1>
+        <h1 className="text-2xl font-bold text-gray-100">Solicitudes de Cambio de Turno</h1>
         <Button onClick={() => { resetForm(); setShowForm(true) }} icon={<ArrowLeftRight className="w-4 h-4" />}>Nueva Solicitud</Button>
       </div>
 
@@ -103,8 +105,8 @@ export function ShiftSwap() {
                     <p className="font-semibold text-sm">{userMap.get(s.solicitanteId) || 'Desconocido'}</p>
                     <Badge variant={estadoVariant(s.estado)}>{s.estado}</Badge>
                   </div>
-                  <p className="text-sm text-gray-500">Turno original: {s.turnoOriginal}</p>
-                  <p className="text-sm text-gray-500">Turno propuesto: {s.turnoPropuesto}</p>
+                  <p className="text-sm text-gray-400">Turno original: {s.turnoOriginal}</p>
+                  <p className="text-sm text-gray-400">Turno propuesto: {s.turnoPropuesto}</p>
                   {s.reemplazanteId && <p className="text-xs text-gray-400">Reemplazante: {userMap.get(s.reemplazanteId)}</p>}
                   {s.motivo && <p className="text-xs text-gray-400 italic">Motivo: {s.motivo}</p>}
                 </div>
@@ -123,29 +125,29 @@ export function ShiftSwap() {
       <Modal open={showForm} onClose={() => setShowForm(false)} title="Nueva Solicitud de Cambio" size="lg">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+            <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-1.5">
               <Clock className="w-4 h-4" /> Turno Actual
             </label>
             {misHorarios.length === 0 ? (
-              <p className="text-sm text-gray-400 bg-gray-50 rounded-lg p-3">No tienes horarios asignados</p>
+              <p className="text-sm text-gray-400 bg-gray-900 rounded-lg p-3">No tienes horarios asignados</p>
             ) : (
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {misHorarios.map(h => {
                   const diaNombre = DIAS_SEMANA.find(d => d.id === h.diaSemana)?.nombre || ''
-                  const label = `${diaNombre} ${h.horaInicio}-${h.horaFin}${h.sede ? ` | ${h.sede}` : ''}`
+                  const label = `${diaNombre} ${h.horaInicio}-${h.horaFin}`
                   return (
                     <div
                       key={h.id}
                       onClick={() => selectHorario(h)}
                       className={`p-3 rounded-lg border cursor-pointer transition-all text-sm ${
                         form.turnoOriginalId === h.id
-                          ? 'border-primary-500 bg-primary-50 ring-1 ring-primary-500'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                          ? 'border-primary-500 bg-gray-800 ring-1 ring-primary-500'
+                          : 'border-gray-700 hover:border-gray-600 bg-gray-800'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <Calendar className={`w-4 h-4 ${form.turnoOriginalId === h.id ? 'text-primary-600' : 'text-gray-400'}`} />
-                        <span className={form.turnoOriginalId === h.id ? 'font-medium text-primary-800' : 'text-gray-700'}>{label}</span>
+                        <Calendar className={`w-4 h-4 ${form.turnoOriginalId === h.id ? 'text-primary-400' : 'text-gray-500'}`} />
+                        <span className={form.turnoOriginalId === h.id ? 'font-medium text-primary-200' : 'text-gray-400'}>{label}</span>
                       </div>
                     </div>
                   )
@@ -153,12 +155,12 @@ export function ShiftSwap() {
               </div>
             )}
             {form.turnoOriginalTexto && (
-              <p className="text-xs text-primary-600 mt-1">Seleccionado: {form.turnoOriginalTexto}</p>
+              <p className="text-xs text-primary-400 mt-1">Seleccionado: {form.turnoOriginalTexto}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+            <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-1.5">
               <ArrowLeftRight className="w-4 h-4" /> Turno Propuesto
             </label>
             <div className="grid grid-cols-3 gap-3">
@@ -172,7 +174,7 @@ export function ShiftSwap() {
               <Input id="horaFinPropuesto" label="Hora fin" type="time" value={form.horaFinPropuesto} onChange={e => setForm(f => ({ ...f, horaFinPropuesto: e.target.value }))} />
             </div>
             {form.diaPropuesto && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-1">
                 Propuesto: {DIAS_SEMANA.find(d => d.id === Number(form.diaPropuesto))?.nombre} {form.horaInicioPropuesto}-{form.horaFinPropuesto}
               </p>
             )}

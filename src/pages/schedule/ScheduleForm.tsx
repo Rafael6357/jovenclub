@@ -8,7 +8,7 @@ import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { DIAS_SEMANA, SEDES } from '../../lib/constants'
+import { DIAS_SEMANA } from '../../lib/constants'
 
 export function ScheduleForm() {
   const { id } = useParams()
@@ -19,7 +19,6 @@ export function ScheduleForm() {
     usuarioId: '', diaSemana: '1', horaInicio: '08:00', horaFin: '16:00',
     validoDesde: new Date().toISOString().split('T')[0],
     validoHasta: new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0],
-    sede: SEDES[0],
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -37,7 +36,6 @@ export function ScheduleForm() {
           horaFin: horario.horaFin,
           validoDesde: horario.validoDesde,
           validoHasta: horario.validoHasta,
-          sede: horario.sede || SEDES[0],
         })
       }
     }
@@ -70,11 +68,11 @@ export function ScheduleForm() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
         <Link to="/horarios"><Button variant="ghost" icon={<ArrowLeft className="w-4 h-4" />}>Volver</Button></Link>
-        <h1 className="text-2xl font-bold text-gray-900">{isEdit ? 'Editar Horario' : 'Asignar Horario'}</h1>
+        <h1 className="text-2xl font-bold text-gray-100">{isEdit ? 'Editar Horario' : 'Asignar Horario'}</h1>
       </div>
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{error}</div>}
+          {error && <div className="bg-red-900/30 text-red-300 text-sm p-3 rounded-lg">{error}</div>}
           <Select
             id="usuarioId" label="Instructor"
             value={form.usuarioId}
@@ -97,12 +95,7 @@ export function ScheduleForm() {
             <Input id="validoDesde" label="Válido desde" type="date" value={form.validoDesde} onChange={e => setForm(f => ({ ...f, validoDesde: e.target.value }))} />
             <Input id="validoHasta" label="Válido hasta" type="date" value={form.validoHasta} onChange={e => setForm(f => ({ ...f, validoHasta: e.target.value }))} />
           </div>
-          <Select
-            id="sede" label="Sede"
-            value={form.sede}
-            onChange={e => setForm(f => ({ ...f, sede: e.target.value }))}
-            options={SEDES.map(s => ({ value: s, label: s }))}
-          />
+
           <div className="flex justify-end gap-3 pt-4">
             <Link to="/horarios"><Button variant="secondary" type="button">Cancelar</Button></Link>
             <Button type="submit" loading={loading}>{isEdit ? 'Guardar Cambios' : 'Asignar Horario'}</Button>

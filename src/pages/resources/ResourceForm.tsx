@@ -38,15 +38,15 @@ export function ResourceForm() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
         <Link to="/recursos"><Button variant="ghost" icon={<ArrowLeft className="w-4 h-4" />}>Volver</Button></Link>
-        <h1 className="text-2xl font-bold text-gray-900">{isEdit ? 'Editar Recurso' : 'Nuevo Recurso'}</h1>
+        <h1 className="text-2xl font-bold text-gray-100">{isEdit ? 'Editar Recurso' : 'Nuevo Recurso'}</h1>
       </div>
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input id="nombre" label="Nombre" value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} required />
           <Select id="tipo" label="Tipo" value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))} options={TIPOS_RECURSO.map(t => ({ value: t, label: t }))} />
           <Textarea id="descripcion" label="Descripción" value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            <input type="checkbox" checked={form.disponible} onChange={e => setForm(f => ({ ...f, disponible: e.target.checked }))} className="rounded" />
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
+            <input type="checkbox" checked={form.disponible} onChange={e => setForm(f => ({ ...f, disponible: e.target.checked }))} className="rounded accent-primary-500 bg-gray-900 border-gray-600" />
             Disponible
           </label>
           <div className="flex justify-end gap-3 pt-4">

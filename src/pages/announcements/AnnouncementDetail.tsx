@@ -41,7 +41,7 @@ export function AnnouncementDetail() {
   const userMap = new Map(usuarios.map(u => [u.id, u.nombre]))
 
   if (loading) return <div className="text-center py-10 text-gray-400">Cargando...</div>
-  if (!anuncio) return <div className="text-center py-10 text-gray-500">Anuncio no encontrado</div>
+  if (!anuncio) return <div className="text-center py-10 text-gray-400">Anuncio no encontrado</div>
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -49,10 +49,10 @@ export function AnnouncementDetail() {
       <Card>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{anuncio.titulo}</h1>
+            <h1 className="text-2xl font-bold text-gray-100">{anuncio.titulo}</h1>
             <div className="flex items-center gap-3 mt-2">
               <Badge variant="success"><CheckCheck className="w-3 h-3 mr-1" /> Leído</Badge>
-              <span className="text-sm text-gray-500">Por {userMap.get(anuncio.autorId) || 'Desconocido'}</span>
+              <span className="text-sm text-gray-400">Por {userMap.get(anuncio.autorId) || 'Desconocido'}</span>
             </div>
           </div>
         </div>
@@ -60,15 +60,15 @@ export function AnnouncementDetail() {
           <span>Publicado: {formatDateTime(anuncio.fechaPublicacion)}</span>
           {anuncio.fechaExpiracion && <span>Expira: {formatDateTime(anuncio.fechaExpiracion)}</span>}
         </div>
-        <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{anuncio.contenido}</div>
+        <div className="prose prose-sm max-w-none text-gray-200 whitespace-pre-wrap">{anuncio.contenido}</div>
       </Card>
 
       {isAdmin() && (
         <Card>
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <h3 className="font-semibold text-gray-100 mb-3 flex items-center gap-2">
             <Users className="w-4 h-4" /> Reporte de Lecturas ({stats.leidos}/{stats.total} - {stats.porcentaje}%)
           </h3>
-          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+          <div className="w-full bg-gray-700 rounded-full h-2.5 mb-4">
             <div className="bg-green-500 h-2.5 rounded-full transition-all" style={{ width: `${stats.porcentaje}%` }} />
           </div>
           {lectores.length === 0 ? (
@@ -76,8 +76,8 @@ export function AnnouncementDetail() {
           ) : (
             <div className="space-y-2">
               {lectores.map(l => (
-                <div key={`${l.anuncioId}_${l.usuarioId}`} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                  <Avatar nombre={l.nombreUsuario || 'N/A'} size="sm" />
+                <div key={`${l.anuncioId}_${l.usuarioId}`} className="flex items-center gap-3 p-2 rounded-lg bg-gray-900">
+                  <Avatar name={l.nombreUsuario || 'N/D'} size="sm" />
                   <div>
                     <p className="text-sm font-medium">{l.nombreUsuario || l.usuarioId}</p>
                     <p className="text-xs text-gray-400">{formatDateTime(l.fechaLectura)}</p>

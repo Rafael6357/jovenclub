@@ -13,9 +13,14 @@ type AutoTableOptions = {
   headStyles?: Record<string, unknown>
 }
 
-async function getUsuariosMap(): Promise<Map<string, string>> {
-  const usuarios = await db.usuarios.toArray()
-  return new Map(usuarios.map(u => [u.id, u.nombre]))
+const _userCache = new Map<string, string>()
+
+async function getUserName(id: string): Promise<string> {
+  if (_userCache.has(id)) return _userCache.get(id)!
+  const user = await db.usuarios.get(id)
+  const name = user?.nombre || id
+  _userCache.set(id, name)
+  return name
 }
 
 async function getRecursosMap(): Promise<Map<string, string>> {
@@ -24,7 +29,7 @@ async function getRecursosMap(): Promise<Map<string, string>> {
 }
 
 function downloadFile(content: string, filename: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType })
+  const blob = new Blob(['\uFEFF' + content], { type: `${mimeType};charset=utf-8` })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -58,20 +63,19 @@ function addPDFHeader(doc: jsPDF, title: string, subtitle?: string) {
 // --- REPORTES PDF ---
 
 export async function reporteHorariosPDF(): Promise<void> {
+  const horarios = await db.horarios.toArray()
+  if (horarios.length === 0) throw new Error('No hay horarios registrados para exportar.')
   const doc = new jsPDF()
   addPDFHeader(doc, 'Reporte de Horarios del Personal')
-  const userMap = await getUsuariosMap()
-  const horarios = await db.horarios.toArray()
-  const data = horarios.map(h => [
-    userMap.get(h.usuarioId) || h.usuarioId,
+  const data = await Promise.all(horarios.map(async h => [
+    await getUserName(h.usuarioId),
     DIAS_SEMANA.find(d => d.id === h.diaSemana)?.nombre || '',
     `${h.horaInicio} - ${h.horaFin}`,
-    h.validoDesde,
-    h.validoHasta,
-    h.sede || '-',
-  ])
+    formatDate(h.validoDesde),
+    formatDate(h.validoHasta),
+  ]))
   const tableOpts: AutoTableOptions = {
-    head: [['Empleado', 'Día', 'Horario', 'Desde', 'Hasta', 'Sede']],
+    head: [['Empleado', 'Día', 'Horario', 'Desde', 'Hasta']],
     body: data,
     startY: 38,
   }
@@ -80,15 +84,15 @@ export async function reporteHorariosPDF(): Promise<void> {
 }
 
 export async function reporteAnunciosPDF(): Promise<void> {
+  const anuncios = await db.anuncios.toArray()
+  if (anuncios.length === 0) throw new Error('No hay anuncios registrados para exportar.')
   const doc = new jsPDF()
   addPDFHeader(doc, 'Reporte de Anuncios')
-  const userMap = await getUsuariosMap()
-  const anuncios = await db.anuncios.toArray()
   const data = await Promise.all(anuncios.map(async a => {
     const leido = await db.lecturasAnuncio.where('anuncioId').equals(a.id).count()
     return [
       a.titulo,
-      userMap.get(a.autorId) || a.autorId,
+      await getUserName(a.autorId),
       formatDate(a.fechaPublicacion),
       formatDate(a.fechaExpiracion),
       `${leido} leídos`,
@@ -104,21 +108,21 @@ export async function reporteAnunciosPDF(): Promise<void> {
 }
 
 export async function reporteReservasPDF(): Promise<void> {
+  const reservas = await db.reservas.toArray()
+  if (reservas.length === 0) throw new Error('No hay reservas registradas para exportar.')
   const doc = new jsPDF()
   addPDFHeader(doc, 'Reporte de Reservas de Recursos')
-  const userMap = await getUsuariosMap()
   const recursoMap = await getRecursosMap()
-  const reservas = await db.reservas.toArray()
-  const data = reservas.map(r => [
+  const data = await Promise.all(reservas.map(async r => [
     recursoMap.get(r.recursoId) || r.recursoId,
     r.tituloEvento,
-    userMap.get(r.usuarioId) || r.usuarioId,
+    await getUserName(r.usuarioId),
     formatDate(r.fechaInicio),
-    formatTime(r.fechaInicio.split('T')[1]),
+    formatTime(r.fechaInicio),
     formatDate(r.fechaFin),
-    formatTime(r.fechaFin.split('T')[1]),
+    formatTime(r.fechaFin),
     r.estado,
-  ])
+  ]))
   const tableOpts: AutoTableOptions = {
     head: [['Recurso', 'Evento', 'Solicita', 'Fecha Ini.', 'Hora Ini.', 'Fecha Fin.', 'Hora Fin.', 'Estado']],
     body: data,
@@ -131,29 +135,28 @@ export async function reporteReservasPDF(): Promise<void> {
 // --- REPORTES CSV ---
 
 export async function reporteHorariosCSV(): Promise<void> {
-  const userMap = await getUsuariosMap()
   const horarios = await db.horarios.toArray()
-  const data = horarios.map(h => ({
-    Empleado: userMap.get(h.usuarioId) || h.usuarioId,
+  if (horarios.length === 0) throw new Error('No hay horarios registrados para exportar.')
+  const data = await Promise.all(horarios.map(async h => ({
+    Empleado: await getUserName(h.usuarioId),
     Día: DIAS_SEMANA.find(d => d.id === h.diaSemana)?.nombre || '',
     HoraInicio: h.horaInicio,
     HoraFin: h.horaFin,
-    Desde: h.validoDesde,
-    Hasta: h.validoHasta,
-    Sede: h.sede || '-',
-  }))
+    Desde: formatDate(h.validoDesde),
+    Hasta: formatDate(h.validoHasta),
+  })))
   downloadFile(Papa.unparse(data), 'reporte_horarios.csv', 'text/csv')
 }
 
 export async function reporteAnunciosCSV(): Promise<void> {
-  const userMap = await getUsuariosMap()
   const anuncios = await db.anuncios.toArray()
+  if (anuncios.length === 0) throw new Error('No hay anuncios registrados para exportar.')
   const data = []
   for (const a of anuncios) {
     const leidos = await db.lecturasAnuncio.where('anuncioId').equals(a.id).count()
     data.push({
       Título: a.titulo,
-      Autor: userMap.get(a.autorId) || a.autorId,
+      Autor: await getUserName(a.autorId),
       Publicación: formatDate(a.fechaPublicacion),
       Expiración: formatDate(a.fechaExpiracion),
       Lecturas: leidos,
@@ -163,40 +166,55 @@ export async function reporteAnunciosCSV(): Promise<void> {
 }
 
 export async function reporteReservasCSV(): Promise<void> {
-  const userMap = await getUsuariosMap()
-  const recursoMap = await getRecursosMap()
   const reservas = await db.reservas.toArray()
-  const data = reservas.map(r => ({
+  if (reservas.length === 0) throw new Error('No hay reservas registradas para exportar.')
+  const recursoMap = await getRecursosMap()
+  const data = await Promise.all(reservas.map(async r => ({
     Recurso: recursoMap.get(r.recursoId) || r.recursoId,
     Evento: r.tituloEvento,
-    Solicitante: userMap.get(r.usuarioId) || r.usuarioId,
-    FechaInicio: r.fechaInicio,
-    FechaFin: r.fechaFin,
+    Solicitante: await getUserName(r.usuarioId),
+    'Fecha Inicio': formatDate(r.fechaInicio),
+    'Hora Inicio': formatTime(r.fechaInicio),
+    'Fecha Fin': formatDate(r.fechaFin),
+    'Hora Fin': formatTime(r.fechaFin),
     Asistentes: r.asistentes,
     Estado: r.estado,
-  }))
+  })))
   downloadFile(Papa.unparse(data), 'reporte_reservas.csv', 'text/csv')
+}
+
+export async function reporteUsuarioHorariosCSV(usuarioId: string): Promise<void> {
+  const horarios = await db.horarios.where('usuarioId').equals(usuarioId).toArray()
+  if (horarios.length === 0) throw new Error('No tienes horarios registrados.')
+  const nombre = await getUserName(usuarioId)
+  const data = horarios.map(h => ({
+    Día: DIAS_SEMANA.find(d => d.id === h.diaSemana)?.nombre || '',
+    'Hora Inicio': h.horaInicio,
+    'Hora Fin': h.horaFin,
+    Desde: formatDate(h.validoDesde),
+    Hasta: formatDate(h.validoHasta),
+  }))
+  downloadFile(Papa.unparse(data), `horario_${nombre.replace(/\s+/g, '_')}.csv`, 'text/csv')
 }
 
 // --- REPORTES POR USUARIO ---
 
 export async function reporteUsuarioHorariosPDF(usuarioId: string): Promise<void> {
+  const horarios = await db.horarios.where('usuarioId').equals(usuarioId).toArray()
+  if (horarios.length === 0) throw new Error('No tienes horarios registrados.')
   const doc = new jsPDF()
   addPDFHeader(doc, 'Mi Horario Personal')
-  const userMap = await getUsuariosMap()
-  const nombre = userMap.get(usuarioId) || usuarioId
+  const nombre = await getUserName(usuarioId)
   doc.setFontSize(10)
   doc.text(`Empleado: ${nombre}`, 14, 38)
-  const horarios = await db.horarios.where('usuarioId').equals(usuarioId).toArray()
   const data = horarios.map(h => [
     DIAS_SEMANA.find(d => d.id === h.diaSemana)?.nombre || '',
     `${h.horaInicio} - ${h.horaFin}`,
-    h.validoDesde,
-    h.validoHasta,
-    h.sede || '-',
+    formatDate(h.validoDesde),
+    formatDate(h.validoHasta),
   ])
   const tableOpts: AutoTableOptions = {
-    head: [['Día', 'Horario', 'Desde', 'Hasta', 'Sede']],
+    head: [['Día', 'Horario', 'Desde', 'Hasta']],
     body: data,
     startY: 42,
   }

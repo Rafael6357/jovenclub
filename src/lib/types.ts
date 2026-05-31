@@ -9,9 +9,8 @@ export interface Usuario {
   nombre: string
   email: string
   rolId: string
-  fotoURL: string
+  fotoURL?: string
   telefono: string
-  password: string
 }
 
 export interface Horario {
@@ -22,7 +21,6 @@ export interface Horario {
   horaFin: string
   validoDesde: string
   validoHasta: string
-  sede?: string
 }
 
 export interface SolicitudCambioTurno {

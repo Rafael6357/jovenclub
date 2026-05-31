@@ -24,17 +24,17 @@ export function PersonnelDirectory() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Directorio del Personal</h1>
+      <h1 className="text-2xl font-bold text-gray-100">Directorio del Personal</h1>
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
             type="text" placeholder="Buscar por nombre o email..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+            className="w-full pl-10 pr-3 py-2 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
           />
         </div>
-        <select value={filterRol} onChange={e => setFilterRol(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg bg-white">
+        <select value={filterRol} onChange={e => setFilterRol(e.target.value)} className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-900 text-gray-100">
           <option value="">Todos los roles</option>
           <option value="admin">Administrador</option>
           <option value="instructor">Instructor</option>
@@ -50,15 +50,15 @@ export function PersonnelDirectory() {
           {filtered.map(u => (
             <Card key={u.id} className="hover:shadow-md transition-shadow">
               <div className="flex items-start gap-4">
-                <Avatar nombre={u.nombre} size="lg" />
+                <Avatar name={u.nombre} size="lg" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-gray-900 truncate">{u.nombre}</h3>
+                    <h3 className="font-semibold text-gray-100 truncate">{u.nombre}</h3>
                     <Badge variant={u.rolId === 'admin' ? 'info' : 'default'}>
-                      {u.rolId === 'admin' ? 'Admin' : 'Instructor'}
+                      {u.rolId === 'admin' ? 'Administrador' : 'Instructor'}
                     </Badge>
                   </div>
-                  <div className="space-y-1 text-sm text-gray-500">
+                  <div className="space-y-1 text-sm text-gray-400">
                     <div className="flex items-center gap-2"><Mail className="w-3.5 h-3.5" /><span className="truncate">{u.email}</span></div>
                     {u.telefono && <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5" /><span>{u.telefono}</span></div>}
                   </div>

@@ -51,11 +51,11 @@ export function BookingForm() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
         <Link to="/reservas"><Button variant="ghost" icon={<ArrowLeft className="w-4 h-4" />}>Volver</Button></Link>
-        <h1 className="text-2xl font-bold text-gray-900">Nueva Reserva</h1>
+        <h1 className="text-2xl font-bold text-gray-100">Nueva Reserva</h1>
       </div>
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{error}</div>}
+          {error && <div className="bg-red-900/30 text-red-300 text-sm p-3 rounded-lg">{error}</div>}
           <Select
             id="recursoId" label="Recurso"
             value={form.recursoId}

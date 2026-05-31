@@ -1,0 +1,15 @@
+[auth]
+enabled = true
+
+[edge_runtime]
+policy = "per_worker"
+
+[functions]
+[functions.create-user]
+enabled = true
+
+[functions.update-user]
+enabled = true
+
+[functions.delete-user]
+enabled = true

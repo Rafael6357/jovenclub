@@ -17,12 +17,17 @@ export function formatDateTime(dateStr: string): string {
   } catch { return '' }
 }
 
-export function formatTime(timeStr: string): string {
-  return timeStr || ''
+export function formatTime(dateOrTimeStr: string | undefined): string {
+  if (!dateOrTimeStr) return ''
+  const timePart = dateOrTimeStr.includes('T') ? dateOrTimeStr.split('T')[1] : dateOrTimeStr
+  if (!timePart) return ''
+  const match = timePart.match(/^(\d{2}:\d{2})/)
+  return match ? match[1] : timePart.slice(0, 5)
 }
 
 export function getInitials(nombre: string): string {
-  return nombre.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  if (!nombre?.trim()) return '??'
+  return nombre.trim().split(/\s+/).map(n => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
 export function generateId(): string {

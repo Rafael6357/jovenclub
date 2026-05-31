@@ -33,4 +33,4 @@ export const ESTADOS_SOLICITUD = {
   RECHAZADA: 'rechazada',
 } as const
 
-export const SEDES = ['San Luis Principal', 'Sede 2']
+export const SEDES: string[] = []

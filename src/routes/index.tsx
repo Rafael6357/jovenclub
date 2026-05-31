@@ -20,12 +20,14 @@ import { BookingCalendar } from '../pages/bookings/BookingCalendar'
 import { BookingForm } from '../pages/bookings/BookingForm'
 import { ReportsPage } from '../pages/reports/ReportsPage'
 import { Settings } from '../pages/settings/Settings'
+import { PublicBoard } from '../pages/public/PublicBoard'
 
 export function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/tablero" element={<PublicBoard />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
           <Route path="/" element={<Dashboard />} />
