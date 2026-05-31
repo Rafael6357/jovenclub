@@ -24,7 +24,7 @@ export async function register(data: {
     nombre: data.nombre,
     email: data.email,
     telefono: data.telefono,
-    rolId: 'instructor',
+    rolId: 'admin',
   }
 
   // Save locally immediately so onAuthStateChange can find it

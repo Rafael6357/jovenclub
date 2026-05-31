@@ -136,6 +136,8 @@ const TABLES_ORDER = [
 export async function pushAllToSupabase(
   onProgress?: (table: string, current: number, total: number) => void
 ): Promise<void> {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) return
   await clearSyncQueue()
   for (const name of TABLES_ORDER) {
     const records = await (db as any)[name].toArray()
