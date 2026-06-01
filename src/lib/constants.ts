@@ -34,3 +34,11 @@ export const ESTADOS_SOLICITUD = {
 } as const
 
 export const SEDES: string[] = []
+
+export const BRAND = {
+  name: 'COMUNICA-JC',
+  fullName: 'Joven Club de Computación y Electrónica',
+  location: 'San Luis',
+  version: '1.0.0',
+  logoUrl: '/logo.svg',
+} as const

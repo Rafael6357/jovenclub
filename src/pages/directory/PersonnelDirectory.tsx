@@ -4,6 +4,7 @@ import { Card } from '../../components/ui/Card'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { PageLoader } from '../../components/ui/Spinner'
 import { Search, BookUser, Phone, Mail } from 'lucide-react'
 
 export function PersonnelDirectory() {
@@ -31,10 +32,10 @@ export function PersonnelDirectory() {
           <input
             type="text" placeholder="Buscar por nombre o email..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-600 rounded-lg bg-gray-900 text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
+            className="w-full pl-10 pr-3 py-2 border border-gray-700 rounded-lg bg-gray-900 text-gray-100 focus:ring-2 focus:ring-primary-500 outline-none"
           />
         </div>
-        <select value={filterRol} onChange={e => setFilterRol(e.target.value)} className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-900 text-gray-100">
+        <select value={filterRol} onChange={e => setFilterRol(e.target.value)} className="px-3 py-2 border border-gray-700 rounded-lg bg-gray-900 text-gray-100">
           <option value="">Todos los roles</option>
           <option value="admin">Administrador</option>
           <option value="instructor">Instructor</option>
@@ -42,7 +43,7 @@ export function PersonnelDirectory() {
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-400">Cargando...</div>
+        <PageLoader />
       ) : filtered.length === 0 ? (
         <EmptyState icon={<BookUser className="w-12 h-12" />} title="No hay personal" description="No se encontraron miembros del personal" />
       ) : (

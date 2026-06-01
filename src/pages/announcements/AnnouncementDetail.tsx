@@ -9,6 +9,9 @@ import { Badge } from '../../components/ui/Badge'
 import { Avatar } from '../../components/ui/Avatar'
 import { ArrowLeft, CheckCheck, Users } from 'lucide-react'
 import { formatDateTime } from '../../lib/utils'
+import { PageLoader } from '../../components/ui/Spinner'
+import { EmptyState } from '../../components/ui/EmptyState'
+import { Megaphone } from 'lucide-react'
 
 export function AnnouncementDetail() {
   const { id } = useParams()
@@ -40,8 +43,8 @@ export function AnnouncementDetail() {
 
   const userMap = new Map(usuarios.map(u => [u.id, u.nombre]))
 
-  if (loading) return <div className="text-center py-10 text-gray-400">Cargando...</div>
-  if (!anuncio) return <div className="text-center py-10 text-gray-400">Anuncio no encontrado</div>
+  if (loading) return <PageLoader />
+  if (!anuncio) return <EmptyState icon={<Megaphone className="w-12 h-12" />} title="Anuncio no encontrado" description="El anuncio que buscas no existe o fue eliminado" />
 
   return (
     <div className="space-y-6 max-w-3xl">

@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { PageLoader } from '../../components/ui/Spinner'
 import { formatDateTime } from '../../lib/utils'
 import { Plus, Pencil, Trash2, Megaphone, ChevronRight } from 'lucide-react'
 
@@ -46,7 +47,7 @@ export function AnnouncementList() {
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-400">Cargando...</div>
+        <PageLoader />
       ) : anuncios.length === 0 ? (
         <EmptyState icon={<Megaphone className="w-12 h-12" />} title="No hay anuncios" description="No se han publicado anuncios aún" />
       ) : (
@@ -67,9 +68,9 @@ export function AnnouncementList() {
                     {isAdmin() && (
                       <>
                         <Link to={`/anuncios/${a.id}/editar`} onClick={e => e.stopPropagation()}>
-                          <Button variant="ghost" size="sm"><Pencil className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" aria-label="Editar anuncio"><Pencil className="w-4 h-4" /></Button>
                         </Link>
-                        <Button variant="ghost" size="sm" onClick={e => { e.stopPropagation(); setDeleteId(a.id) }}>
+                        <Button variant="ghost" size="sm" onClick={e => { e.stopPropagation(); setDeleteId(a.id) }} aria-label="Eliminar anuncio">
                           <Trash2 className="w-4 h-4 text-red-400" />
                         </Button>
                       </>

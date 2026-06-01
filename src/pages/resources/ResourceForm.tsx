@@ -46,7 +46,7 @@ export function ResourceForm() {
           <Select id="tipo" label="Tipo" value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))} options={TIPOS_RECURSO.map(t => ({ value: t, label: t }))} />
           <Textarea id="descripcion" label="Descripción" value={form.descripcion} onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))} />
           <label className="flex items-center gap-2 text-sm font-medium text-gray-300">
-            <input type="checkbox" checked={form.disponible} onChange={e => setForm(f => ({ ...f, disponible: e.target.checked }))} className="rounded accent-primary-500 bg-gray-900 border-gray-600" />
+            <input type="checkbox" checked={form.disponible} onChange={e => setForm(f => ({ ...f, disponible: e.target.checked }))} className="rounded accent-primary-500 bg-gray-900 border-gray-700" />
             Disponible
           </label>
           <div className="flex justify-end gap-3 pt-4">

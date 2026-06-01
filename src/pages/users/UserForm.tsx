@@ -7,7 +7,8 @@ import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { PasswordInput } from '../../components/ui/PasswordInput'
+import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export function UserForm() {
@@ -20,7 +21,6 @@ export function UserForm() {
     nombre: '', email: '', telefono: '', rolId: 'instructor', password: '',
   })
   const [originalRolId, setOriginalRolId] = useState<string | null>(null)
-  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -108,23 +108,14 @@ export function UserForm() {
               La contraseña no se puede cambiar desde aquí. El usuario debe iniciar sesión y cambiarla en su perfil.
             </div>
           ) : (
-            <div className="w-full">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">Contraseña</label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                  required
-                  placeholder="••••••••"
-                  className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors pr-10 bg-gray-900 text-gray-100"
-                />
-                <button type="button" tabIndex={-1} onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300">
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+            <PasswordInput
+              id="password"
+              label="Contraseña"
+              value={form.password}
+              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+              required
+              placeholder="••••••••"
+            />
           )}
           <div className="flex justify-end gap-3 pt-4">
             <Link to="/usuarios"><Button variant="secondary" type="button">Cancelar</Button></Link>

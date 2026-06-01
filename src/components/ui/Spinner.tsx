@@ -12,3 +12,14 @@ export function PageLoader() {
     </div>
   )
 }
+
+export function FullScreenLoader() {
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-950">
+      <div className="text-center">
+        <Loader2 className="w-12 h-12 animate-spin text-primary-400 mx-auto mb-4" />
+        <p className="text-gray-100 text-lg font-medium">Cargando...</p>
+      </div>
+    </div>
+  )
+}

@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
-import { Eye, EyeOff } from 'lucide-react'
+import { PasswordInput } from '../components/ui/PasswordInput'
+import { BRAND } from '../lib/constants'
 
 export function Register() {
   const [nombre, setNombre] = useState('')
@@ -11,8 +12,6 @@ export function Register() {
   const [telefono, setTelefono] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const authRegister = useAuthStore(s => s.register)
@@ -56,9 +55,9 @@ export function Register() {
           <div className="w-20 h-20 rounded-2xl mx-auto mb-4 shadow-lg overflow-hidden">
             <img src={bgUrl} alt="Joven Club" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-2xl font-bold text-primary-200 drop-shadow-lg">COMUNICA-JC</h1>
-          <p className="text-primary-300 mt-1 drop-shadow-md">Joven Club de Computación y Electrónica</p>
-          <p className="text-primary-400 text-sm drop-shadow">San Luis, Santiago de Cuba</p>
+          <h1 className="text-2xl font-bold text-primary-200 drop-shadow-lg">{BRAND.name}</h1>
+          <p className="text-primary-300 mt-1 drop-shadow-md">{BRAND.fullName}</p>
+          <p className="text-primary-400 text-sm drop-shadow">{BRAND.location}, Santiago de Cuba</p>
         </div>
         <form onSubmit={handleSubmit} className="bg-gray-800 rounded-xl shadow-xl shadow-black/30 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-100 text-center">Crear Cuenta</h2>
@@ -67,40 +66,22 @@ export function Register() {
           <Input id="nombre" label="Nombre completo" value={nombre} onChange={e => setNombre(e.target.value)} required />
           <Input id="email" label="Correo electrónico" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
           <Input id="telefono" label="Teléfono" value={telefono} onChange={e => setTelefono(e.target.value)} required />
-          <div className="w-full">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">Contraseña</label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors pr-10 bg-gray-900 text-gray-100"
-              />
-              <button type="button" tabIndex={-1} onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300">
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-          <div className="w-full">
-            <label htmlFor="confirm" className="block text-sm font-medium text-gray-300 mb-1">Confirmar contraseña</label>
-            <div className="relative">
-              <input
-                id="confirm"
-                type={showConfirm ? 'text' : 'password'}
-                value={confirm}
-                onChange={e => setConfirm(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors pr-10 bg-gray-900 text-gray-100"
-              />
-              <button type="button" tabIndex={-1} onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300">
-                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
+          <PasswordInput
+            id="password"
+            label="Contraseña"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
+          <PasswordInput
+            id="confirm"
+            label="Confirmar contraseña"
+            value={confirm}
+            onChange={e => setConfirm(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
           <Button type="submit" loading={loading} className="w-full">Registrarse</Button>
           <div className="text-center text-sm text-gray-400">
             ¿Ya tienes cuenta?{' '}

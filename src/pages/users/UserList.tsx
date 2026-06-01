@@ -9,6 +9,7 @@ import { Avatar } from '../../components/ui/Avatar'
 import { Modal } from '../../components/ui/Modal'
 import { Input } from '../../components/ui/Input'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { PageLoader } from '../../components/ui/Spinner'
 import { Plus, Pencil, Trash2, Search, Users } from 'lucide-react'
 
 export function UserList() {
@@ -64,12 +65,12 @@ export function UserList() {
           placeholder="Buscar por nombre o email..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-3 py-2 bg-gray-900 text-gray-100 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+          className="w-full pl-10 pr-3 py-2 bg-gray-900 text-gray-100 border border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
         />
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-400">Cargando...</div>
+        <PageLoader />
       ) : filtered.length === 0 ? (
         <EmptyState icon={<Users className="w-12 h-12" />} title="No hay usuarios" description="Crea el primer usuario del sistema" />
       ) : (
@@ -107,7 +108,7 @@ export function UserList() {
                           <Button variant="ghost" size="sm" icon={<Pencil className="w-4 h-4" />}>Editar</Button>
                         </Link>
                         {currentUser && u.id !== currentUser.id && (
-                          <Button variant="ghost" size="sm" icon={<Trash2 className="w-4 h-4 text-red-400" />} onClick={() => { setDeleteError(''); setDeleteModal(u.id) }} />
+                          <Button variant="ghost" size="sm" icon={<Trash2 className="w-4 h-4 text-red-400" />} onClick={() => { setDeleteError(''); setDeleteModal(u.id) }} aria-label="Eliminar usuario" />
                         )}
                       </div>
                     </td>

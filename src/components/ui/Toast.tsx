@@ -6,7 +6,7 @@ export function Toast() {
   if (notifications.length === 0) return null
 
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm">
+    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm" role="status" aria-live="polite">
       {notifications.map(n => (
         <div
           key={n.id}
@@ -17,7 +17,7 @@ export function Toast() {
           }`}
         >
           <span className="flex-1">{n.message}</span>
-          <button onClick={() => remove(n.id)} className="opacity-60 hover:opacity-100 shrink-0">
+          <button onClick={() => remove(n.id)} className="opacity-60 hover:opacity-100 shrink-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-label="Cerrar notificación">
             <X className="w-4 h-4" />
           </button>
         </div>

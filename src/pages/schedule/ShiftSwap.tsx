@@ -10,6 +10,7 @@ import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Input } from '../../components/ui/Input'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { PageLoader } from '../../components/ui/Spinner'
 import { DIAS_SEMANA } from '../../lib/constants'
 import { ArrowLeftRight, Check, X as XIcon, Clock, Calendar } from 'lucide-react'
 
@@ -98,7 +99,7 @@ export function ShiftSwap() {
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-400">Cargando...</div>
+        <PageLoader />
       ) : solicitudes.length === 0 ? (
         <EmptyState icon={<ArrowLeftRight className="w-12 h-12" />} title="No hay solicitudes" description="No se encontraron solicitudes de cambio" />
       ) : (

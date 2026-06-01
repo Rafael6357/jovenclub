@@ -6,6 +6,7 @@ import {
   Megaphone, Monitor, CalendarRange, FileText, Settings, X
 } from 'lucide-react'
 import { classNames } from '../../lib/utils'
+import { BRAND } from '../../lib/constants'
 
 const allLinks = [
   { to: '/', icon: LayoutDashboard, label: 'Panel', adminOnly: false },
@@ -37,13 +38,13 @@ export function Sidebar() {
       )}>
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-700">
           <div className="w-10 h-10 rounded-xl bg-primary-800 flex items-center justify-center">
-            <span className="text-gray-950 font-bold text-sm">JC</span>
+            <span className="text-white font-bold text-sm">JC</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-primary-300 truncate">COMUNICA-JC</p>
-            <p className="text-xs text-gray-400 truncate">Joven Club San Luis</p>
+            <p className="text-sm font-bold text-primary-300 truncate">{BRAND.name}</p>
+            <p className="text-xs text-gray-400 truncate">Joven Club {BRAND.location}</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 hover:bg-gray-800 rounded text-gray-400">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 hover:bg-gray-800 rounded text-gray-400 focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="Cerrar menú">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -55,7 +56,7 @@ export function Sidebar() {
               end={link.to === '/'}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => classNames(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
                 isActive
                   ? 'bg-primary-700/30 text-white'
                   : 'text-gray-400 hover:bg-gray-800 hover:text-white'

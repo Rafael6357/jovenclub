@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { PageLoader } from '../../components/ui/Spinner'
 import { DIAS_SEMANA } from '../../lib/constants'
 import { Plus, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -73,7 +74,7 @@ export function WeeklySchedule() {
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-400">Cargando...</div>
+        <PageLoader />
       ) : horarios.length === 0 ? (
         <EmptyState icon={<Calendar className="w-12 h-12" />} title="No hay horarios" description="No se encontraron horarios para este período" />
       ) : (
@@ -97,10 +98,10 @@ export function WeeklySchedule() {
 
                       {isAdmin() && (
                         <div className="flex gap-1 pt-1">
-                          <Link to={`/horarios/${h.id}/editar`} className="text-primary-400 hover:text-primary-300">
+                          <Link to={`/horarios/${h.id}/editar`} className="text-primary-400 hover:text-primary-300 focus-visible:ring-2 focus-visible:ring-primary-500 rounded" aria-label="Editar horario">
                             <Pencil className="w-3 h-3" />
                           </Link>
-                          <button onClick={() => setDeleteId(h.id)} className="text-red-400 hover:text-red-300">
+                          <button onClick={() => setDeleteId(h.id)} className="text-red-400 hover:text-red-300 focus-visible:ring-2 focus-visible:ring-red-400 rounded" aria-label="Eliminar horario">
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>

@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { PageLoader } from '../../components/ui/Spinner'
 import { formatDate, formatTime } from '../../lib/utils'
 import { Plus, CalendarRange, X as XIcon, Pencil } from 'lucide-react'
 
@@ -46,7 +47,7 @@ export function BookingCalendar() {
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-400">Cargando...</div>
+        <PageLoader />
       ) : reservas.length === 0 ? (
         <EmptyState icon={<CalendarRange className="w-12 h-12" />} title="No hay reservas" description="No se encontraron reservas de recursos" />
       ) : (

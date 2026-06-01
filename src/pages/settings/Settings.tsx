@@ -8,6 +8,7 @@ import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
+import { BRAND } from '../../lib/constants'
 import { Modal } from '../../components/ui/Modal'
 import { Settings as SettingsIcon, RefreshCw, Trash2, User, QrCode } from 'lucide-react'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
@@ -149,8 +150,8 @@ export function Settings() {
       <Card>
         <h3 className="font-semibold text-gray-100 mb-2">Acerca de</h3>
         <div className="text-sm text-gray-300 space-y-1">
-          <p><strong>COMUNICA-JC</strong> v1.0.0</p>
-          <p>Joven Club de Computación y Electrónica de San Luis</p>
+          <p><strong>{BRAND.name}</strong> v{BRAND.version}</p>
+          <p>{BRAND.fullName} de {BRAND.location}</p>
           <p>Santiago de Cuba</p>
           <p className="text-xs text-gray-400 mt-2">Aplicación web con arquitectura offline-first</p>
         </div>

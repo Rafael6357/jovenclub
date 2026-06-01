@@ -16,7 +16,7 @@ export function Header() {
 
   return (
     <header className="h-16 bg-gray-900 border-b border-gray-700 flex items-center justify-between px-4 lg:px-6">
-      <button onClick={toggleSidebar} className="p-2 hover:bg-gray-800 rounded-lg lg:hidden text-gray-400">
+      <button onClick={toggleSidebar} className="p-2 hover:bg-gray-800 rounded-lg lg:hidden text-gray-400 focus-visible:ring-2 focus-visible:ring-primary-500" aria-label="Abrir menú">
         <Menu className="w-5 h-5" />
       </button>
       <div className="hidden lg:block" />
@@ -25,7 +25,8 @@ export function Header() {
         <div className="h-6 w-px bg-gray-700" />
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-400 transition-colors"
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-400 transition-colors focus-visible:ring-2 focus-visible:ring-red-400 rounded px-1"
+          aria-label="Cerrar sesión"
         >
           <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Salir</span>

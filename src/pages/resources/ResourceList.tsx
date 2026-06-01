@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { PageLoader } from '../../components/ui/Spinner'
 import { Plus, Pencil, Trash2, Monitor } from 'lucide-react'
 
 export function ResourceList() {
@@ -37,7 +38,7 @@ export function ResourceList() {
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-gray-400">Cargando...</div>
+        <PageLoader />
       ) : recursos.length === 0 ? (
         <EmptyState icon={<Monitor className="w-12 h-12" />} title="No hay recursos" description="No se encontraron salas o equipos registrados" />
       ) : (
@@ -58,7 +59,7 @@ export function ResourceList() {
                 {isAdmin() && (
                   <div className="flex gap-1">
                     <Link to={`/recursos/${r.id}/editar`}><Button variant="ghost" size="sm"><Pencil className="w-4 h-4" /></Button></Link>
-                    <Button variant="ghost" size="sm" onClick={() => setDeleteId(r.id)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => setDeleteId(r.id)} aria-label="Eliminar recurso"><Trash2 className="w-4 h-4 text-red-400" /></Button>
                   </div>
                 )}
               </div>

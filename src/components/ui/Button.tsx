@@ -11,11 +11,11 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const variants = {
-  primary: 'bg-primary-800 text-gray-950 hover:bg-primary-700 shadow-sm',
-  secondary: 'bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700',
-  danger: 'bg-red-700 text-white hover:bg-red-600',
-  success: 'bg-green-700 text-white hover:bg-green-600',
-  ghost: 'text-gray-400 hover:bg-gray-800',
+  primary: 'bg-primary-700 text-white hover:bg-primary-600 shadow-sm focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
+  secondary: 'bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
+  danger: 'bg-red-700 text-white hover:bg-red-600 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
+  success: 'bg-green-700 text-white hover:bg-green-600 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
+  ghost: 'text-gray-400 hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950',
 }
 
 const sizes = {

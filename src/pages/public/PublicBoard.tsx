@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { DIAS_SEMANA } from '../../lib/constants'
+import { DIAS_SEMANA, BRAND } from '../../lib/constants'
 
 interface Anuncio {
   id: string; titulo: string; contenido: string; fechaPublicacion: string; fechaExpiracion: string; autorId: string
@@ -62,9 +62,9 @@ export function PublicBoard() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        <div className="text-center border-b border-gray-800 pb-4">
-          <h1 className="text-2xl font-bold text-primary-300">COMUNICA-JC</h1>
-          <p className="text-sm text-gray-400">Joven Club de Computación y Electrónica · San Luis</p>
+        <div className="text-center border-b border-gray-700 pb-4">
+          <h1 className="text-2xl font-bold text-primary-300">{BRAND.name}</h1>
+          <p className="text-sm text-gray-400">{BRAND.fullName} · {BRAND.location}</p>
           <p className="text-xs text-gray-500 mt-1 capitalize">{fechaActual}</p>
         </div>
 
@@ -84,7 +84,7 @@ export function PublicBoard() {
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {anuncios.map(a => (
-                    <div key={a.id} className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+                    <div key={a.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
                       <h3 className="font-medium text-gray-100">{a.titulo}</h3>
                       <p className="text-sm text-gray-400 mt-1 line-clamp-3">{a.contenido}</p>
                       <p className="text-xs text-gray-500 mt-2">Publicado: {formatDate(a.fechaPublicacion)}</p>
@@ -108,7 +108,7 @@ export function PublicBoard() {
                     if (!diaHorarios) return null
                     const diaNombre = DIAS_SEMANA.find(d => d.id === dia)?.nombre
                     return (
-                      <div key={dia} className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+                      <div key={dia} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
                         <h3 className="font-medium text-gray-100 mb-2">{diaNombre}</h3>
                         <ul className="space-y-1.5">
                           {diaHorarios.map(h => (
@@ -135,7 +135,7 @@ export function PublicBoard() {
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {reservas.map(r => (
-                    <div key={r.id} className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+                    <div key={r.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <h3 className="font-medium text-gray-100">{r.tituloEvento}</h3>
@@ -157,7 +157,7 @@ export function PublicBoard() {
         )}
 
         <p className="text-center text-xs text-gray-600 pb-4">
-          Datos actualizados cada 30 segundos · COMUNICA-JC v1.0.0
+          Datos actualizados cada 30 segundos · {BRAND.name} v{BRAND.version}
         </p>
       </div>
     </div>
