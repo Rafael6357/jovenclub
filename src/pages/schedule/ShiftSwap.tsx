@@ -57,8 +57,12 @@ export function ShiftSwap() {
     await createSolicitud({
       solicitanteId: usuario.id,
       reemplazanteId: form.reemplazanteId,
+      horarioId: form.turnoOriginalId,
       turnoOriginal: form.turnoOriginalTexto,
       turnoPropuesto,
+      diaPropuesto: Number(form.diaPropuesto),
+      horaInicioPropuesto: form.horaInicioPropuesto,
+      horaFinPropuesto: form.horaFinPropuesto,
       motivo: form.motivo,
     })
     setShowForm(false)
@@ -88,7 +92,9 @@ export function ShiftSwap() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-100">Solicitudes de Cambio de Turno</h1>
-        <Button onClick={() => { resetForm(); setShowForm(true) }} icon={<ArrowLeftRight className="w-4 h-4" />}>Nueva Solicitud</Button>
+        {!isAdmin() && (
+          <Button onClick={() => { resetForm(); setShowForm(true) }} icon={<ArrowLeftRight className="w-4 h-4" />}>Nueva Solicitud</Button>
+        )}
       </div>
 
       {loading ? (

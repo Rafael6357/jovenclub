@@ -77,9 +77,9 @@ export function AnnouncementDetail() {
             <div className="space-y-2">
               {lectores.map(l => (
                 <div key={`${l.anuncioId}_${l.usuarioId}`} className="flex items-center gap-3 p-2 rounded-lg bg-gray-900">
-                  <Avatar name={l.nombreUsuario || 'N/D'} size="sm" />
+                  <Avatar name={userMap.get(l.usuarioId) || 'N/D'} size="sm" />
                   <div>
-                    <p className="text-sm font-medium">{l.nombreUsuario || l.usuarioId}</p>
+                    <p className="text-sm font-medium">{userMap.get(l.usuarioId) || l.usuarioId}</p>
                     <p className="text-xs text-gray-400">{formatDateTime(l.fechaLectura)}</p>
                   </div>
                 </div>

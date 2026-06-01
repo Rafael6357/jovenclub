@@ -29,6 +29,20 @@ export async function createSolicitud(data: Omit<SolicitudCambioTurno, 'id' | 'f
 }
 
 export async function aprobarSolicitud(id: string): Promise<void> {
+  const solicitud = await db.solicitudesCambio.get(id)
+  if (solicitud?.horarioId && solicitud.diaPropuesto !== undefined && solicitud.horaInicioPropuesto && solicitud.horaFinPropuesto) {
+    await db.horarios.update(solicitud.horarioId, {
+      diaSemana: solicitud.diaPropuesto,
+      horaInicio: solicitud.horaInicioPropuesto,
+      horaFin: solicitud.horaFinPropuesto,
+    })
+    await addToSyncQueue('horarios', solicitud.horarioId, 'UPDATE', {
+      id: solicitud.horarioId,
+      diaSemana: solicitud.diaPropuesto,
+      horaInicio: solicitud.horaInicioPropuesto,
+      horaFin: solicitud.horaFinPropuesto,
+    })
+  }
   await db.solicitudesCambio.update(id, { estado: 'aprobada' })
   await addToSyncQueue('solicitudesCambio', id, 'UPDATE', { id, estado: 'aprobada' })
 }

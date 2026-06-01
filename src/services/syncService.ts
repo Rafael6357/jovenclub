@@ -189,12 +189,52 @@ export async function initSupabaseSync(): Promise<void> {
   }
 }
 
+const PULL_COLLECTIONS = [
+  'horarios', 'anuncios', 'recursos', 'reservas',
+  'solicitudesCambio', 'lecturasAnuncio', 'adjuntos', 'eventosReserva',
+] as const
+
+export async function pullAllFromSupabase(): Promise<number> {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) return 0
+  const pendientes = await db.colaSincronizacion.count()
+  if (pendientes > 0) return 0
+  let count = 0
+  for (const name of PULL_COLLECTIONS) {
+    const { data, error } = await supabase.from(name).select('*')
+    if (error || !data) continue
+    const remoteKeys = new Set((data as any[]).map((it: any) => it.id ?? `${it.anuncioId}_${it.usuarioId}`))
+    for (const item of data) {
+      const normalized = normalizeRecord(name, item)
+      await (db as any)[name].put(normalized)
+      count++
+    }
+    const local: any[] = await (db as any)[name].toArray()
+    for (const item of local) {
+      const key = item.id ?? `${item.anuncioId}_${item.usuarioId}`
+      if (!remoteKeys.has(key)) {
+        if (item.id) {
+          await (db as any)[name].delete(item.id)
+        } else {
+          await (db as any)[name].delete([item.anuncioId, item.usuarioId])
+        }
+      }
+    }
+  }
+  return count
+}
+
 // Auto-retry when browser comes back online
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
     procesarCola((procesados) => {
       if (procesados > 0) {
         window.dispatchEvent(new CustomEvent('sync-complete', { detail: { procesados } }))
+      }
+    })
+    pullAllFromSupabase().then((count) => {
+      if (count > 0) {
+        window.dispatchEvent(new CustomEvent('sync-complete', { detail: { procesados: count } }))
       }
     })
   })
@@ -210,4 +250,13 @@ if (typeof window !== 'undefined') {
     }
   }
   setInterval(autoRetry, 30000)
+
+  // Periodic pull from Supabase (every 30s) to keep other users' changes in sync
+  async function autoPull() {
+    const pulled = await pullAllFromSupabase()
+    if (pulled > 0) {
+      window.dispatchEvent(new CustomEvent('sync-complete', { detail: { procesados: pulled } }))
+    }
+  }
+  setInterval(autoPull, 30000)
 }

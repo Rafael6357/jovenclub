@@ -28,8 +28,12 @@ export interface SolicitudCambioTurno {
   solicitanteId: string
   reemplazanteId: string
   fechaSolicitud: string
+  horarioId?: string
   turnoOriginal: string
   turnoPropuesto: string
+  diaPropuesto?: number
+  horaInicioPropuesto?: string
+  horaFinPropuesto?: string
   estado: 'pendiente' | 'aprobada' | 'rechazada'
   motivo?: string
 }
